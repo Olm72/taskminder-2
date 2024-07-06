@@ -1,0 +1,22 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+    <div class="contenedor_conectado">
+        <section class="conectado_pagina">
+            <h1>{{request.cookies.get('usuario')}}, ya estás dentro</h1><br><br><br>
+
+            <div class="botones-conectado">
+                <form action="/taskminder" method="GET">
+                    <button type="submit" class="boton-conectado">TaskMinder App</button>
+                </form>
+            </div><br>
+
+            <div class="botones-conectado">
+                <form action="/logout" method="GET">
+                    <button type="submit" class="boton-conectado">Cerrar sesión</button>
+                </form>
+            </div>
+
+        </section>
+    </div>
+</body>

@@ -1,0 +1,19 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body class="body-login">
+
+    <header class="header">
+        <a href="/" class="logo">TaskMinder</a>
+    </header>
+    <div class="login-formulario-regístrate">
+        <div class="form-box-login">
+            <h2>¡Enhorabuena!</h2>
+            <p>Gracias por registrarte, entra a nuestra app</p>
+            <div class="inicio-contenido">
+                <a href="/login" class="btn">Iniciar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página -->
+    {% include 'sitio/pie_pagina.html' %}

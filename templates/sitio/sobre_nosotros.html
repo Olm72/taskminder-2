@@ -1,0 +1,23 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+
+    <!-- Lo que hay dentro de la página -->
+    <section class="sobre-nosotros">
+
+        <!-- Botón TaskMinder App -->
+        <div class="sobre-nosotros-contenido">
+            <h1>¡Bienvenido a TaskMinder!</h1>
+            <H3>Diseñada por el ingeniero informático Olmo LM</H3>
+            <p>En TaskMinder, creemos en simplificar la gestión del tiempo. Nuestra aplicación te ayuda a organizar tus horarios, adaptándose a imprevistos para que puedas realizar tus tareas a tiempo.
+                Únete a nosotros y haz que cada minuto cuente con TaskMinder.</p>
+
+            <div class="boton-sobre-nosotros">
+                <a href="/aplicacion">TaskMinder App</a>
+                <a href="https://www.linkedin.com/in/olmolopezmatabuena/" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    {% include 'sitio/pie_pagina.html' %}

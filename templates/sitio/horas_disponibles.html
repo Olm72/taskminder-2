@@ -1,0 +1,23 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+
+    <section class="premium">
+
+        <!-- Botón TaskMinder App -->
+        <div class="premium-contenido">
+        {% extends 'base.html' %}
+
+        {% block content %}
+            <h2>Introduce el tiempo disponible</h2>
+            <form method="POST" action="{{ url_for('horas_disponibles') }}">
+                <label for="horas">Horas disponibles:</label>
+                <input type="number" id="horas" name="horas" step="0.1" required value="{{ tiempo_disponible }}">
+                <button type="submit">Guardar</button>
+            </form>
+        {% endblock %}
+        </div>
+    </section>
+
+<!-- Pie de página -->
+{% include 'sitio/pie_pagina.html' %}

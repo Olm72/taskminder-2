@@ -1,0 +1,1765 @@
+/* Importo el tipo de letra de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Selector Universal */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    scrollbar-color: #44d9e8 transparent;
+}
+
+body {
+    background: #1a0932; /* Color fondo de la web */
+    font-family: 'Poppins', sans-serif;
+    color: #00fef5;
+    scrollbar-color: #44d9e8 transparent;
+}
+
+html, body {
+
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Configuración video */
+.video-contenedor {
+    position: absolute; /* Establece que el video ocupe toda la pantalla y que no aparezca abajo más pantalla azul */
+    width: 100%;
+    height: 100vh; /* Establece la altura que se ve el video, recorta de abajo */
+    overflow: hidden; /* Oculta cualquier parte del video que se extienda fuera del contenedor */
+}
+
+#video-fondo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 100%; /* Ajusta el ancho mínimo al 100% */
+    min-height: 100%; /* Ajusta la altura mínima al 100% */
+    width: 560px;
+    height: 1080px;
+    z-index: -1;
+}
+
+/* Menú */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 10%;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+
+/* TaskMinder Logo */
+.logo {
+    font-size: 25px;
+    color: #f8f9fa; /* Color letras menú TaskMinder */
+    text-decoration: none;
+    font-weight: 600;
+    opacity: 0;
+    text-shadow: 0px 0px 5px #00fef5; /* Efecto neón "Taskminder" menú */
+    animation: zoomOut 1.3s ease forwards; /* Animación del logo del menú */
+}
+
+.logo:hover {
+    color: #f8f9fa;
+}
+
+/* Color resto de elementos del menú */
+.navbar a {
+    display: inline-block;
+    font-size: 18px;
+    color: #f8f9fa;
+    text-decoration: none;
+    font-weight: 500;
+    margin: 0 20px;
+    transition: .3s; /* Tiempo que tardan en cambiar de color los elementos del menú cuando les pasas por encima con el ratón */
+    opacity: 0;
+    text-shadow: 0px 0px 5px #6f42c1; /* Efecto neón objetos menú */
+    animation: slideTop 1s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+}
+
+.navbar a:hover,
+.navbar a.active {
+    color: #fec10c; /* Color al que cambian los elementos del menú al pasarles por encima; al escribir a.active también la palabra inicio del menú se mantiene en este color */
+}
+
+
+/* Social Media */
+.social-media {
+    display:flex;
+    justify-content: space-between;
+    width: 150px;
+    height: 40px;
+    text-shadow: 0px 0px 2px #6f42c1; /* Efecto neón redes sociales */
+}
+
+.social-media a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: transparent; /* Color red social del cuadrado invertido */
+    border: 2px solid transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    transform: rotate(45deg);
+    transition: .5s;
+    opacity: 0;
+    animation: slideSci 1s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+}
+
+.social-media a:hover {
+    border-color: #00fef5; /* Color red social del cuadrado invertido al pasar por encima */
+    box-shadow: 0px 0px 5px #f8f9fa;
+}
+
+.social-media a i {
+    font-size: 24px;
+    color: #fec10c; /* Color red social icono */
+    transform: rotate(-45deg);
+}
+
+/* Botón "TaskMinder App" */
+.inicio {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 8% 0;
+    overflow: hidden;
+}
+
+.inicio-contenido {
+    max-width: 630px;
+}
+
+/* Botón TaskMinder App inicio */
+.btn {
+    display: inline-block;
+    padding: 20px 40px;
+    background: #fec10c;
+    color: #1a0932;
+    border: 2px solid #ffe63f;
+    border-radius: 10px;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    text-shadow: 0px 0px 5px #6f42c1;
+    font-weight: 500;
+    transition: .5s;
+    position: fixed;
+    top: 80%; /* Posición vertical del botón */
+    left: 50%; /* Posición horizontal */
+    transform: translate(-50%, -50%); /* Centra el botón */
+}
+
+.btn:hover {
+    background: #ffe63f;
+    color: #1a0932;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Keyframes Animation */
+/* Logo animación */
+@keyframes zoomOut {
+    0% {
+        transform: scale(2);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Resto de objetos del menú */
+@keyframes slideTop {
+    0% {
+        transform: scale(1);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Redes sociales */
+@keyframes slideSci {
+    0% {
+        transform: translateX(100px) rotate(45deg);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0) rotate(45deg);
+        opacity: 1;
+    }
+}
+
+/* Estilos para el pie de página */
+.footer {
+    background-color: transparent;
+    padding: 20px;
+    text-align: center;
+}
+
+.redes-sociales {
+    display: flex;
+    justify-content: center; /* Centrar horizontalmente los iconos */
+    gap: 60px; /* Ajustar el espaciado entre los iconos */
+}
+
+.redes-sociales a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: transparent; /* Color red social del cuadrado invertido */
+    border: 2px solid transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.5s, box-shadow 0.5s;
+    transform: rotate(45deg);
+}
+
+.redes-sociales a:hover {
+    border-color: #00fef5; /* Color red social del cuadrado invertido al pasar por encima */
+    box-shadow: 0px 0px 5px #f8f9fa;
+}
+
+.redes-sociales a i {
+    font-size: 24px;
+    color: #fec10c; /* Color red social icono */
+    transform: rotate(-45deg);
+}
+
+usuario-conectado-mensaje {
+    color: #04f5ec;
+    margin-top: 20px;
+}
+
+/* Taskminder APP */
+body.taskminder, .body-taskminder {
+    background-image: url("taskminder_web_design_def_background2.png");
+    color: #04f5ec;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+}
+
+h1.taskminder, h1.h1-taskminder {
+    text-align: center;
+    margin-top: 80px;
+}
+
+h2.taskminder {
+    text-align: center;
+    margin-top: 20px;
+}
+
+form.taskminder, .formulario-grupo-taskminder {
+    margin-bottom: 15px;
+    color: #04f5ec;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+label.taskminder, .formulario-grupo-etiqueta-taskminder {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="number"].taskminder,
+input[type="time"].taskminder,
+select.taskminder,
+.formulario-grupo-input-taskminder,
+.formulario-grupo-input-tiempo-taskminder,
+.formulario-grupo-seleccion-taskminder {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+.checkbox-group.taskminder, .checkbox-group.taskminder label {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 10px;
+    margin-right: 10px;
+}
+
+button.taskminder, .botones-taskminder button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.accordion.taskminder {
+    background-color: #6f42c1;
+    color: #04f5ec;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: center;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+    border-radius: 10px;
+}
+
+.accordion.taskminder:after {
+    content: '\002B';
+    color: #777;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.active.taskminder:after {
+    content: "\2212";
+}
+
+.panel.taskminder {
+    padding: 0 18px;
+    background-color: transparent;
+
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    text-align: center;
+}
+
+.horario.taskminder {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.dia.taskminder {
+    border: 1px solid #6f42c1;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.tarea-item.taskminder {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+.boton-modificar-taskminder,
+.boton-borrar-taskminder-tarea-individual {
+    background-color: #1a0932;
+    color: #e638b7;
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    width: 15%;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    margin-right: 10px;
+}
+
+.tareas-ingresadas-contenedor-taskminder {
+    background-color: #e638b7;
+    color: #fec10c;
+    padding: 40px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.tarea-específica-taskminder {
+    background-color: #e638b7;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+#agregar-tarea-btn {
+    background-color: #04ff00 ;
+    color: #1a0932;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#agregar-tarea-btn:hover {
+    background-color: #04f5ec;
+    color: #e638b7;
+}
+
+.boton-ok-taskminder:hover,
+.boton-modificar-taskminder:hover,
+.boton-borrar-taskminder-tarea-individual:hover,
+.boton-enviar-taskminder:hover,
+.boton-borrar-taskminder:hover {
+    opacity: 1;
+}
+
+/* Sobre Nosotros estilos */
+.sobre-nosotros {
+    height: 100vh;
+    background-image: url("taskminder_web_design_def_background_sobre.png");
+    background-size: cover; /* Ajusta el tamaño de la imagen para cubrir todo el contenedor */
+    background-position: center; /* Centra la imagen dentro del contenedor */
+    display: flex;
+    align-items: center;
+    padding: 0 10%;
+}
+
+.sobre-nosotros-contenido {
+    background: transparent;
+    max-width: 780px; /* Anchura que abarcará el texto */
+}
+
+/* Título "sobre nosotros" dentro del cuerpo */
+.sobre-nosotros-contenido h1 {
+    font-size: 50px;
+    font-weight: 700;
+    text-shadow: 0px 0px 5px #44d9e8;
+    line-height: 1.2;
+    animation: slideTop 3s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-top: 20px; /* Ajusta el espacio entre el mensaje y el checkbox */
+    margin-bottom: 30px;
+}
+
+/* Segundo Título */
+.sobre-nosotros-contenido h3 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #6f42c1;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-top: 10px; /* Ajusta el espacio entre el mensaje y el checkbox */
+    margin-bottom: 40px;
+}
+
+/* Párrafo "sobre nosotros" dentro del cuerpo */
+.sobre-nosotros-contenido p {
+    font-size: 20px;
+    margin: 20px 0 40px; /* Determina el espacio que tiene el párrafo por arriba y por abajo */
+    font-weight: 500;
+    color: #f8f9fa;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-bottom: 50px;
+}
+
+
+/* botones de "sobre nosotros" */
+.sobre-nosotros-contenido .btn-box{
+    display: flex;
+    justify-content: space-between; /* Separa los botones */
+    width: 345px;
+    height: 50px;
+}
+
+/* Botón izquierda sobre nosotros */
+.boton-sobre-nosotros a {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 150%;
+    padding: 20px;
+    background: #fec10c;
+    border: 2px solid #ffe63f;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #1a0932;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1;
+    overflow: hidden;
+    transition: .5s;
+    margin-right: 60px;
+    text-shadow: 0px 0px 5px #6f42c1;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Botón derecha sobre nosotros */
+.boton-sobre-nosotros a:nth-child(2) {
+    background: transparent;
+    color: #00fef5;
+    border: 2px solid #ffe63f;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Cambios que producen los botones de sobre nosotros */
+.boton-sobre-nosotros a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #e638b7; /* Color al que cambiarán los botones al pasar por encima */
+    z-index: -1;
+    transition: .5s;
+}
+
+.boton-sobre-nosotros a:hover::before {
+    width: 100%;
+}
+
+.boton-sobre-nosotros a:nth-child(2)::before{
+    background: #e638b7;
+}
+
+.boton-sobre-nosotros a:nth-child(2):hover {
+    color: #00fef5;
+    background: #e638b7
+}
+
+/* KEYFRAMES ANIMATION */
+/* Título sobre nosotros */
+@keyframes  {
+    0% {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Opiniones estilos */
+.opiniones {
+    height: 100vh;
+    background: url("taskminder_opiniones_uno2u.png");
+    background-size: cover; /* Ajusta el tamaño de la imagen para cubrir todo el contenedor */
+    background-position: center; /* Centra la imagen dentro del contenedor */
+    display: flex;
+    align-items: center;
+    padding: 0 10%;
+}
+
+.opiniones-contenido {
+    background: transparent;
+    max-width: 780px; /* Anchura que abarcará el texto */
+}
+
+/* Título "sobre nosotros" dentro del cuerpo */
+.opiniones-contenido h1 {
+    font-size: 50px;
+    font-weight: 700;
+    text-shadow: 0px 0px 5px #44d9e8;
+    line-height: 1.2;
+    animation: slideTop 3s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-top: 20px; /* Ajusta el espacio entre el mensaje y el checkbox */
+    margin-bottom: 30px;
+}
+
+/* Segundo Título */
+.opiniones-contenido h3 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #6f42c1;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-top: 10px; /* Ajusta el espacio entre el mensaje y el checkbox */
+    margin-bottom: 40px;
+}
+
+/* Párrafo "opiniones" dentro del cuerpo */
+.opiniones-contenido p {
+    font-size: 20px;
+    margin: 20px 0 40px; /* Determina el espacio que tiene el párrafo por arriba y por abajo */
+    font-weight: 500;
+    color: #f8f9fa;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-bottom: 50px;
+}
+
+/* botones de "opiniones" */
+.opiniones-contenido .btn-box{
+    display: flex;
+    justify-content: space-between; /* Separa los botones */
+    width: 345px;
+    height: 50px;
+}
+
+/* Botón Opiniones */
+.boton-opiniones a {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 280px;
+    height: 150%;
+    padding: 20px;
+    background: #fec10c;
+    border: 2px solid #ffe63f;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #1a0932;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1;
+    overflow: hidden;
+    transition: .5s;
+    margin-right: 60px;
+    text-shadow: 0px 0px 5px #6f42c1;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Cambios que producen los botones de opiniones */
+.boton-opiniones a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #e638b7; /* Color al que cambiarán los botones al pasar por encima */
+    z-index: -1;
+    transition: .5s;
+}
+
+.boton-opiniones a:hover::before {
+    width: 100%;
+}
+
+/* Letras de h1 en opiniones */
+@keyframes slideTop {
+    0% {
+        transform: scale(1);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.opiniones-imgHover {
+    position: absolute;
+    top: 10;
+    right: 180px;
+    width: 350px;
+    height: 600px; /* ajusta la altura según tus necesidades */
+    background-size: cover;
+    background-position: center;
+    transition: background-color 3s, opacity 3s; /* agrega transición para ambos efectos */
+}
+
+.opiniones-imgHover:hover {
+    background-color: #1a0932; /* cambia el color de fondo en lugar de la imagen */
+    opacity: 0.3;
+}
+
+
+/* PREMIUM */
+/* Premium estilos */
+.premium {
+    height: 100vh;
+    background: url("taskminder_web_design_def_background_sobre.png");
+    background-size: cover; /* Ajusta el tamaño de la imagen para cubrir todo el contenedor */
+    background-position: center; /* Centra la imagen dentro del contenedor */
+    display: flex;
+    align-items: center;
+    padding: 0 10%;
+}
+
+.premium-contenido {
+    background: transparent;
+    max-width: 780px; /* Anchura que abarcará el texto */
+}
+
+/* Título "sobre nosotros" dentro del cuerpo */
+.premium-contenido h1 {
+    font-size: 50px;
+    font-weight: 700;
+    text-shadow: 0px 0px 5px #44d9e8;
+    line-height: 1.2;
+    animation: slideTop 3s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-top: 20px; /* Ajusta el espacio entre el mensaje y el checkbox */
+    margin-bottom: 30px;
+}
+
+/* Segundo Título */
+.premium-contenido h3 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #6f42c1;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-top: 10px; /* Ajusta el espacio entre el mensaje y el checkbox */
+    margin-bottom: 40px;
+}
+
+/* Párrafo "premium" dentro del cuerpo */
+.premium-contenido p {
+    font-size: 20px;
+    margin: 20px 0 40px; /* Determina el espacio que tiene el párrafo por arriba y por abajo */
+    font-weight: 500;
+    color: #f8f9fa;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-bottom: 50px;
+}
+
+/* Botones de "Premium" */
+.premium-contenido .btn-box{
+    display: flex;
+    justify-content: space-between; /* Separa los botones */
+    width: 345px;
+    height: 50px;
+}
+
+/* Botón Opiniones */
+.boton-premium a {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 280px;
+    height: 150%;
+    padding: 20px;
+    background: #fec10c;
+    border: 2px solid #ffe63f;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #1a0932;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1;
+    overflow: hidden;
+    transition: .5s;
+    margin-right: 60px;
+    text-shadow: 0px 0px 5px #6f42c1;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Cambios que producen los botones de opiniones */
+.boton-premium a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #e638b7; /* Color al que cambiarán los botones al pasar por encima */
+    z-index: -1;
+    transition: .5s;
+}
+
+.boton-premium a:hover::before {
+    width: 100%;
+}
+
+/* Letras de h1 en opiniones */
+@keyframes slideTop {
+    0% {
+        transform: scale(1);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+
+/* LOGIN Y REGISTRO */
+/* Formulario Login y registro */
+.body-login {
+    background-image: url('taskminder_web_design_def_background.png');
+    background-size: cover;
+    background-position: center;
+    margin: 0; /* Eliminar el margen predeterminado del body */
+    height: 100vh; /* Ajustar la altura al tamaño de la ventana del navegador */
+}
+
+/* Formulario Login y registro, estilo exterior */
+.login-formulario {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 440px;
+    height: 600px;
+    background: transparent;
+    border: 2px solid #f8f9fa;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 10px #00fef5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: zoomOut 1.3s ease forwards; /* Animación del logo del menú */
+    padding: 30px; /* Ajusta el espacio dentro del formulario */
+    margin: 30px 0 20px;
+}
+
+/* Keyframes Animation */
+/* Formulario regístrate animación */
+@keyframes zoomOut {
+    0% {
+        transform: scale(2);
+        opacity: 0;
+    }
+    100% {
+
+        opacity: 1;
+    }
+}
+
+.login-formulario-regístrate {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 440px;
+    height: 600px;
+    background: transparent;
+    border: 2px solid #f8f9fa;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 10px #00fef5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: zoomOut 1.3s ease forwards; /* Animación del logo del menú */
+    padding: 30px; /* Ajusta el espacio dentro del formulario */
+    margin: 30px 0 20px;
+}
+
+/* Formulario Login y registro, estilo interior */
+.login-formulario .form-box-login {
+    width: 100%;
+    padding: 40px;
+}
+
+.form-box-login h2 {
+    font-size: 40px;
+    color: #e638b7;
+    text-align: center;
+}
+
+.form-box-login p {
+    font-size: 20px;
+    color: #04f5ec;
+    text-align: center;
+}
+.entradas-formulario-login {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    border-bottom: 2px solid #e638b7;
+    margin: 30px 0;
+}
+
+.entradas-formulario-login label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #00fef5;
+    font-weight: 500;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.entradas-formulario-login input:focus ~ label,
+.entradas-formulario-login input:valid ~ label {
+    top: -5px;
+}
+
+.entradas-formulario-login input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #fec10c;
+    font-weight: 600;
+    padding: 0 35px 0 5px;
+}
+
+.entradas-formulario-login .icon {
+    position: absolute;
+    right: 8px;
+    font-size: 19px;
+    color: #00fef5;
+}
+
+/* Estilos para el mensaje de conectado.html */
+.cerrar_sesion h1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #04f5ec;
+    font-size: 24px;
+}
+
+/* Estilos para html conectado y botón cerrar sesión */
+.conectado_pagina {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+/* Estilos de los botones de conectado: taskminder app y cerrar sesión*/
+.boton-conectado {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 150%;
+    padding: 20px;
+    background: #fec10c;
+    border: 2px solid #ffe63f;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #1a0932;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1;
+    overflow: hidden;
+    transition: .5s;
+    text-shadow: 0px 0px 5px #6f42c1;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Cambios que producen los botones de conectado.html */
+.boton-conectado:hover {
+    color: #00fef5;
+    background: #e638b7; /* Color al que cambiarán los botones al pasar por encima */
+}
+
+/* Checkbox: recuérdame */
+.recuérdame {
+    font-size: 14px;
+    color: #00fef5;
+    font-weight: 500;
+    margin: 15px 0 15px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 60px; /* Ajusta el espacio entre el mensaje y el checkbox */
+}
+
+.recuérdame label input {
+    accent-color: #fec10c;
+    margin-right: 3px;
+}
+
+.recuérdame a {
+    color: #e638b7;
+    test-decoration: none;
+}
+
+.recuérdame a:hover {
+    text-decoration: underline;
+}
+
+.btn-login {
+    width: 100%;
+    height: 45px;
+    background: #6f42c1;
+    color: #00fef5;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 15px; /* Ajusta el espacio de arriba eje Y */
+}
+
+.registrate {
+    font-size: 16px;
+    color: #00fef5;
+    text-align: center;
+    font-weight: 500;
+    margin: 15px 0 15px;
+    display: flex;
+    justify-content: center;
+    margin-top: 50px; /* Ajusta el espacio entre el mensaje y el checkbox */
+}
+
+.registrate p a {
+    color: #e638b7;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.registrate p a:hover {
+    text-decoration: underline;
+}
+
+
+/* CONTACTO */
+/* Contacto Estilos */
+.cuerpo-contacto {
+    background-image: url('taskminder_web_design_def_background.png');
+    background-size: cover;
+    background-position: center;
+    margin: 0; /* Eliminar el margen predeterminado del body */
+    height: 100vh; /* Ajustar la altura al tamaño de la ventana del navegador */
+}
+
+/* Formulario contacto, estilo exterior */
+.contacto-formulario {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 440px;
+    height: 600px;
+    background: transparent;
+    border: 2px solid #f8f9fa;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 10px #00fef5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: zoomOut 1.3s ease forwards; /* Animación del logo del menú */
+    padding: 30px; /* Ajusta el espacio dentro del formulario */
+    margin: 30px 0 20px;
+}
+
+/* Keyframes Animation */
+/* Formulario regístrate animación */
+@keyframes zoomOut {
+    0% {
+        transform: scale(2);
+        opacity: 0;
+    }
+    100% {
+
+        opacity: 1;
+    }
+}
+
+/* Formulario contacto */
+.contacto-formulario .contacto-formulario-caja {
+    width: 100%;
+    padding: 40px;
+}
+
+/* Título Formulario contacto */
+.contacto-formulario-caja h2 {
+    font-size: 40px;
+    color: #e638b7;
+    text-align: center;
+}
+
+.entradas-contacto-formulario {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    border-bottom: 2px solid #e638b7; /* Subrayado debajo de cada campo, no para el de mensaje */
+    margin: 30px 0;
+}
+
+.entradas-contacto-formulario-mensaje {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0 20px; /* Ajusta el margen inferior a 20px para crear espacio entre el título y el borde */
+}
+
+.entradas-contacto-formulario label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #00fef5;
+    font-weight: 500;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.entradas-contacto-formulario-mensaje label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #00fef5;
+    font-weight: 500;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.entradas-contacto-formulario input:focus ~ label,
+.entradas-contacto-formulario input:valid ~ label {
+    top: -5px;
+}
+
+.entradas-contacto-formulario-mensaje input:focus ~ label,
+.entradas-contacto-formulario-mensaje input:valid ~ label {
+    top: -5px;
+}
+
+.entradas-contacto-formulario input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #fec10c;
+    font-weight: 600;
+    padding: 0 35px 0 5px;
+}
+
+.entradas-contacto-formulario-mensaje input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #fec10c;
+    font-weight: 600;
+    padding: 0 35px 0 5px;
+}
+
+.entradas-contacto-formulario .icon {
+    position: absolute;
+    right: 8px;
+    font-size: 19px;
+    color: #00fef5;
+}
+
+.entradas-contacto-formulario-mensaje .icon {
+    position: absolute;
+    right: 8px; /* Posición horizontal del icono */
+    top: 50%; /* Ajusta la posición vertical del icono */
+    transform: translateY(-50%); /* Centra verticalmente el icono */
+    font-size: 19px;
+    color: #00fef5;
+}
+
+/* Contacto: Ajustes para el textarea */
+.entradas-contacto-formulario-mensaje textarea {
+    width: 100%;
+    height: 100px; /* Ajusta la altura del textarea según tus necesidades */
+    background: transparent; /* Color de fondo */
+    border: 2px solid #e638b7; /* Color del borde, ancho y estilo */
+    border-radius: 10px;
+    font-size: 16px;
+    color: #fec10c; /* Color del texto */
+    font-weight: 600;
+    padding: 10px 28px 10px 5px; /* Espaciado interno */
+    margin-top: 50px; /* Espacio en la parte superior del textarea */
+    outline: none; /* Anula el contorno predeterminado */
+}
+
+/* Contacto: Ajustes para checkbox */
+.terminos-condiciones-contacto {
+    font-size: 14px;
+    color: #00fef5;
+    font-weight: 500;
+    margin: -15px 0 15px; /* Margen superior e inferior */
+    display: flex;
+    justify-content: space-between;
+    margin-top: 120px; /* Ajusta el espacio entre el mensaje y el checkbox */
+}
+
+.terminos-condiciones-contacto label input {
+    accent-color: #fec10c;
+    margin-right: 3px;
+}
+
+.terminos-condiciones-contacto a {
+    color: #e638b7;
+    test-decoration: none;
+}
+
+.terminos-condiciones-contacto a:hover {
+    text-decoration: underline;
+}
+
+/* Contacto: Ajustes para botón */
+.btn-contacto {
+    width: 100%;
+    height: 45px;
+    background: #6f42c1;
+    color: #00fef5;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 15px; /* Ajusta el espacio de arriba eje Y */
+}
+
+/* Estilos para los mensajes flash */
+.flash-mensaje-contacto {
+    position: fixed; /* Establece la posición fija en la ventana del navegador */
+    top: 90px; /* Ajusta este valor según la altura de tu menú */
+    left: 50%; /* Posiciona el elemento en la mitad horizontal de la pantalla */
+    transform: translateX(-50%); /* Centra el elemento horizontalmente */
+    margin: 0; /* Elimina los márgenes por si acaso */
+}
+
+.alerta {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.alerta-éxito {
+    color: #04ff00;
+    background-color: transparent;
+    border-color: transparent;
+}
+
+
+/* TÉRMINOS Y CONDICIONES */
+.terminos {
+    background-image: url('taskminder_web_design_def_background2.png');
+    height: 100vh;
+    background-size: cover; /* Ajusta el tamaño de la imagen para cubrir todo el contenedor */
+    background-position: center; /* Centra la imagen dentro del contenedor */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20%;
+    text-align: justify;
+    margin: 0;
+    margin
+}
+
+.terminos-condiciones {
+    background: transparent;
+    max-width: 1000px; /* Anchura que abarcará el texto */
+}
+
+/* Términos y condiciones: título */
+.terminos-condiciones h1 {
+    font-size: 34px;
+    font-weight: 700;
+    text-shadow: 0px 0px 5px #44d9e8;
+    line-height: 1.2;
+    animation: slideTop 2s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    margin-top: 140px; /* Ajusta el espacio entre el mensaje y el checkbox */
+    margin-bottom: 80px;
+    text-align: center; /* Centrar el texto */
+}
+
+/* Términos y condiciones: subtítulos */
+.terminos-condiciones li {
+    font-size: 20px;
+    margin: 20px 0 40px; /* Determina el espacio que tiene el párrafo por arriba y por abajo */
+    font-weight: 500;
+    color: #e638b7;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+}
+
+/* Términos y condiciones: texto */
+.terminos-condiciones p {
+    font-size: 20px;
+    margin: 20px 0 40px; /* Determina el espacio que tiene el párrafo por arriba y por abajo */
+    font-weight: 500;
+    color: #f8f9fa;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+}
+
+/* Botón terminos-condiciones */
+.boton-terminos-condiciones {
+    position: relative; /* Asegura que el botón se posicione correctamente */
+    text-align: center; /* Centra el contenido horizontalmente */
+}
+
+.boton-terminos-condiciones a {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 280px;
+    height: 150%;
+    padding: 20px;
+    background: #fec10c;
+    border: 2px solid #ffe63f;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #1a0932;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1;
+    overflow: hidden;
+    transition: .5s;
+    margin-right: 60px;
+    margin-top: 15px; /* Espacio entre el texto y el botón */
+    margin-bottom: 100px; /* Espacio entre el texto y el botón */
+    text-shadow: 0px 0px 5px #6f42c1;
+    box-shadow: 0px 0px 10px #f8f9fa;
+    animation: slideTop 4s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+    position: relative; /* Asegura que el botón se posicione correctamente */
+    text-align: center; /* Centra el contenido horizontalmente */
+}
+
+/* Cambios que producen los botones de opiniones */
+.boton-terminos-condiciones a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #e638b7; /* Color al que cambiarán los botones al pasar por encima */
+    z-index: -1;
+    transition: .5s;
+}
+
+.boton-terminos-condiciones a:hover::before {
+    width: 100%;
+}
+
+
+/* TASKMINDER APP */
+.taskminder-app {
+    background-image: url('taskminder_web_design_def_background.png');
+    background-size: cover;
+    background-position: center;
+    margin: 0; /* Eliminar el margen predeterminado del body */
+    height: 100vh; /* Ajustar la altura al tamaño de la ventana del navegador */
+}
+
+/* taskminder-container */
+.taskminder-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    max-width: 100%;
+    height: 600px;
+    background: transparent;
+    border: 2px solid #f8f9fa;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 10px #00fef5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: zoomOut 1.3s ease forwards; /* Animación del logo del menú */
+    padding: 10px; /* Ajusta el espacio dentro del formulario */
+    margin: 30px 0 20px;
+    overflow: auto; /* Agrega una barra de desplazamiento si el contenido es más grande que el contenedor */
+}
+
+/* Keyframes Animation */
+/* Formulario regístrate animación */
+@keyframes zoomOut {
+    0% {
+        transform: scale(2);
+        opacity: 0;
+    }
+    100% {
+
+        opacity: 1;
+    }
+}
+
+.taskminder-card-formulario {
+    width: 100%;
+    padding: 40px;
+}
+
+.taskminder-card-header {
+    font-size: 32px;
+    color: #e638b7;
+    text-align: center;
+    margin-top: 10px; /* Ajusta la distancia entre el título y el contenido superior */
+}
+
+.taskminder-card-cuerpo {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    border-bottom: 2px solid #e638b7;
+    margin: 30px 0;
+}
+
+.taskminder-tareas-card {
+    position: fixed;
+    top: 180%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 300px;
+    background: transparent;
+    border: 2px solid #f8f9fa;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 10px #00fef5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: zoomOut 1.3s ease forwards; /* Animación del logo del menú */
+    padding: 30px; /* Ajusta el espacio dentro del formulario */
+    margin: 30px 0 20px;
+}
+
+/* Estilos para la imagen de error 404 */
+.error-image {
+    /* Agrega tus estilos específicos aquí */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Escala la imagen para que llene el contenedor sin distorsión */
+}
+
+/* Estilos tareas semana */
+/* REGISTRO TAREAS SEMANA main */
+.titulo-tareas {
+    align-items: center;
+    margin: 0;
+    margin-top: 80px;
+    margin-bottom: 20px;
+    text-align: justify;
+}
+
+/* Registro tareas de la semana: título */
+.texto-centrado-titulo-tareas {
+    font-size: 50px;
+    font-weight: 700;
+    text-shadow: 0px 0px 5px #44d9e8;
+    line-height: 1.2;
+    animation: slideTop 2s ease forwards;
+    animation-delay: calc(.2s * var(--i));
+    margin: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.texto-explicativo-tareas {
+    font-size: 20px;
+    color: #e638b7;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding:
+}
+
+/* Placeholder: estilo */
+input::placeholder {
+    color: #1a0932 !important; /* Color del texto del placeholder explicativo */
+    border-radius: 5px;
+}
+
+/* Placeholder: estilos para los diferentes buscadores */
+input::-webkit-input-placeholder {
+    color: #1a0932 !important; /* Color del texto del placeholder en Chrome y Safari */
+    border-radius: 5px;
+    border: #04f5ec;
+}
+
+input:-moz-placeholder {
+    color: #1a0932 !important; /* Color del texto del placeholder en Firefox 18-*/
+    border-radius: 5px;
+    border: #04f5ec;
+}
+
+input::-moz-placeholder {
+    color: #1a0932 !important; /* Color del texto del placeholder en Firefox 19+*/
+    border-radius: 5px;
+    border: #04f5ec;
+}
+
+input:-ms-input-placeholder {
+    color: #1a0932 !important; /* Color del texto del placeholder en Internet Explorer*/
+    border-radius: 5px;
+    border: #04f5ec;
+}
+
+/* Estilo general de los input */
+input {
+    color: #04f5ec; /* Color del texto tecleado por usuario */
+    border: 2px solid transparent; /* Borde inicial del input transparente */
+    padding: 10px; /* Espacio entre el borde y el texto del placeholder */
+    border-radius: 5px;
+    border: #04f5ec;
+}
+
+/* Estilos de input para focus, active, y autofill */
+input:focus,
+input:active,
+input:-webkit-autofill {
+    background-color: #e638b7 !important; /* Color de fondo input */
+    color: #04f5ec !important; /* Color del texto ingresado */
+    border: #04f5ec; /* Borde del input transparente */
+    outline: none;
+    border-radius: 5px;
+}
+
+/* Autorelleno estilos para Chrome y Safari */
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #e638b7 inset !important; /* Asegura el fondo rosa en autofill */
+    -webkit-text-fill-color: #04f5ec !important; /* Color del texto en autorelleno */
+    border-radius: 5px;
+    border: #04f5ec;
+}
+
+/* Anula la clase de control de formulario si es necesario */
+.form-control {
+    transition: background-color 0.3s, border 0.3s;
+    border-radius: 5px;
+    border: #04f5ec;
+}
+
+/* Estilos para el card de tareas*/
+.card-grupo-tareas {
+    background-color: transparent;
+    display: flex;
+    justify-content: center; /* Centra horizontalmente el contenido del card tareas */
+    align-items: center; /* Centra verticalmente el contenido del card tareas*/
+    width: auto; /* Ancho del card tareas*/
+    height: 200px; /* Alto del card tareas*/
+    margin-left: 0px;
+    margin-top: 140px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.card-body-tareas {
+    background-color: transparent;
+    margin-top: 40px;
+}
+
+.formulario-check-etiqueta {
+    margin-top: 10px;
+}
+
+.respuestas-container,
+.dias-container {
+    display: flex;
+    align-items: center;
+}
+
+.respuestas-container label,
+.dias-container label {
+    margin-right: 10px; /* Espacio entre el texto y las opciones */
+}
+
+/* Ajusta el estilo de los checkbox */
+.formulario-check-tarea {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Espacio entre las opciones */
+}
+
+.formulario-check-tarea input[type="checkbox"] {
+    margin-right: 5px; /* Espacio entre el checkbox y el texto */
+}
+
+/* Estilos para el encabezado del card */
+.card-header-tareas {
+    background-color: #6f42c1;
+    color: #04f5ec;
+    padding: 20px;
+    box-shadow: 0 4px 6px #000000, 0 4px 12px #000000;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Estilos para el cuerpo del card */
+.card-body-tareas {
+    background-color: #1a0932;
+    color: #04f5ec;
+    padding: 10px;
+    border: 1px solid #1a0932;
+}
+
+/* Contenedor de los botones */
+.botones-tareas {
+    display: flex;
+    padding: 20px 40px;
+    align-items: center; /* Alinea verticalmente los botones */
+    gap: 20px; /* Espacio entre los botones */
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background: #ffe63f;
+    color: #1a0932;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Estilo específico para el botón de guardar */
+.btn-guardar {
+    background-color: #04ff00; /* Color verde */
+    color: #fec10c;
+    border: 2px solid #04ff00;
+    border-radius: 10px;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    text-shadow: 0px 0px 5px #6f42c1;
+    font-weight: 500;
+    transition: .5s;
+    position: fixed;
+}
+
+.btn-guardar:hover {
+    background-color: #04ff00;
+}
+
+/* Estilo específico para el botón de borrar */
+.btn-borrar {
+    background-color: #ff0000; /* Color rojo */
+    color: #fec10c;
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    text-shadow: 0px 0px 5px #6f42c1;
+    font-weight: 500;
+    transition: .5s;
+    position: fixed;
+}
+
+.btn-borrar:hover {
+    background-color: #ff0000;
+}
+
+/* Estilo adicional para asegurar que los botones se comporten como bloques */
+.btn-block {
+    width: 15%;
+    display: block;
+}
+
+/* Estilos para los placeholders */
+.form-control::placeholder {
+    color: #04f5ec;
+    background-color: #e638b7;
+    padding: 5px;
+}
+
+input[type="number"] {
+    /* Estilos personalizados */
+    background-color: #e638b7;
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    padding: 8px; /* Espacio interno */
+    font-size: 16px;
+    width: 250px;
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+input[type="number"]:focus {
+
+    border-color: #66afe9;
+    box-shadow: 0 0 5px #66afe9; /* Sombra cuando está enfocado */
+    outline: none;
+}
+
+/* Estilos para los input type */
+input[type="time"].form-control,
+input[type="number"].form-control {
+    background-color: #e638b7;
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    padding: 8px; /* Espacio interno */
+    font-size: 16px;
+    width: 250px;
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+/* Estilo cuando el input está enfocado */
+input[type="time"].form-control:focus,
+input[type="number"].form-control:focus {
+    outline: none; /* Quita el contorno al enfocar el input */
+    box-shadow: 0 0 0 2px #6f42c1; /* Agrega un contorno personalizado al enfocar el input */
+}
+
+/* Estilo general de los input */
+input {
+    color: #04f5ec; /* Color del texto tecleado por usuario */
+    border: 2px solid transparent; /* Borde inicial del input transparente */
+    padding: 5px; /* Espacio entre el borde y el texto del placeholder */
+    margin-bottom: 20px; /* Espacio por abajo */
+}
+
+/* Estilos de checkbox */
+
+
+
+/* Estilos para los botones */
+.botones-tareas-guardar button,
+.botones-tareas-borrar button {
+    margin-bottom: 20px; /* Espacio por abajo */
+}

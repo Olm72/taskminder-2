@@ -1,0 +1,61 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+
+    <!-- Contenedor del formulario de contacto -->
+    <div class="contacto-formulario">
+        <!-- Título del formulario de contacto -->
+        <div class="contacto-formulario-caja">
+            <h2>Contáctanos</h2>
+            <form action="/enviar_mensaje" method="POST">
+                <div class="entradas-contacto-formulario">
+                    <!-- Icono y campo de nombre -->
+                    <span class="icon">
+                        <i class='bx bxs-user'></i>
+                    </span>
+                    <input type="text" name="nombre_usuario" required>
+                    <label>Nombre</label>
+                </div>
+
+                <div class="entradas-contacto-formulario">
+                    <!-- Icono y campo de email -->
+                    <span class="icon">
+                        <i class='bx bxs-envelope'></i>
+                    </span>
+                    <input type="email" name="email" required>
+                    <label>Email</label>
+                </div>
+
+                <div class="entradas-contacto-formulario-mensaje">
+                    <!-- Icono y campo de mensaje -->
+                    <span class="icon">
+                        <i class='bx bxs-message-detail'></i>
+                    </span>
+                    <textarea name="mensaje" placeholder="" class="entradas-contacto-formulario-mensaje" required></textarea>
+                    <label>Mensaje</label>
+                </div>
+
+                <!-- Términos y condiciones -->
+                <div class="terminos-condiciones-contacto">
+                    <label><input type="checkbox" required>Estoy de acuerdo con los términos y condiciones</label>
+                    <a href="/terminos_condiciones" class="register-link">Términos y condiciones</a>
+                </div>
+
+                <!-- Botón enviar formulario -->
+                <button type="submit" class="btn-contacto">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mostrar mensajes flash -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-mensaje-contacto">
+                {% for message in messages %}
+                    <div class="alerta alerta-éxito">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+</body>

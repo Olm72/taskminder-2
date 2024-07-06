@@ -1,0 +1,53 @@
+{% include 'sitio/cabecera.html' %}
+
+<body>
+    <!-- Contenedor del formulario de login -->
+    <div class="login-formulario-regístrate">
+        <!-- Título formulario de registro -->
+        <div class="contacto-formulario-caja">
+            <h2>Danos tu opinión</h2>
+            <form action="/tu_opinion_importa" method="POST">
+                <div class="entradas-contacto-formulario">
+                    <span class="icon">
+                        <i class='bx bxs-user'></i>
+                    </span>
+                    <input type="text" name="nombre" required>
+                    <label>Nombre</label>
+                </div>
+
+                <div class="entradas-contacto-formulario">
+                    <span class="icon">
+                        <i class='bx bxs-envelope' ></i>
+                    </span>
+                    <input type="email" name="email" required>
+                    <label>Email</label>
+                </div>
+
+                <div class="entradas-contacto-formulario-mensaje">
+                    <span class="icon"><i class='bx bxs-message-detail'></i>
+                    </span>
+                    <textarea name="opinion" placeholder="" required></textarea>
+                    <label>Dinos lo que piensas</label>
+                </div>
+
+                <div class="terminos-condiciones-contacto">
+                    <input type="checkbox" id="acuerdo" name="acuerdo" required>
+                    <label for="acuerdo">Estoy de acuerdo con los términos y condiciones</label>
+                    <a href="/terminos_condiciones" class="register-link">Términos y condiciones</a>
+                </div>
+
+                <button type="submit" class="btn-contacto">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-mensaje-contacto">
+                {% for message in messages %}
+                    <div class="alerta alerta-éxito">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</body>

@@ -1,0 +1,13 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+
+    <div style="text-align: center;">
+        <h1>404 - Página no encontrada</h1>
+        <img src="/static/error.png" alt="Error personalizado" class="error-image">
+        <p>Lo sentimos, la página que buscas no se ha encontrado.</p>
+        <a href="/">Volver a la página de inicio</a> <!-- Enlace a la página de inicio -->
+    </div>
+
+    <!-- Pie de página -->
+    {% include 'sitio/pie_pagina.html' %}

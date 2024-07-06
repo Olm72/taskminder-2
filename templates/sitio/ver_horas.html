@@ -1,0 +1,14 @@
+{% include 'sitio/cabecera_taskminder_app.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+    <h1>Horas Disponibles</h1>
+    <ul>
+        {% for dia, horas in horas.items() %}
+            <li>{{ dia }}: {{ horas }} horas</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('configurar_horas') }}">Modificar Horas</a>
+</body>
+
+<!-- Pie de página -->
+{% include 'sitio/pie_pagina.html' %}

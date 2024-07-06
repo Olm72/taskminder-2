@@ -1,0 +1,25 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+
+    <!-- Video de fondo corporativo -->
+    <div class="video-contenedor">
+        <video autoplay muted loop id="video-fondo">
+            <source src="../static/video_taskminder.mp4" type="video/mp4">
+            <!-- Mensaje en caso de que el usuario no pueda ver el video -->
+            Tu navegador no admite el elemento de video
+        </video>
+    </div>
+
+    <!-- Lo que hay dentro de la página -->
+    <section class="inicio">
+        <div class="inicio-contenido">
+            <!-- Botón TaskMinder App -->
+            <a href="/login" class="btn">TaskMinder App</a>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    {% include 'sitio/pie_pagina.html' %}
+
+</body>

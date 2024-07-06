@@ -1,0 +1,43 @@
+{% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+
+    <div class="login-formulario-regístrate">
+        <div class="form-box-login">
+            <h2>Regístrate</h2>
+            <form action="/confirmacion-registro" method="POST">
+                <div class="entradas-formulario-login">
+                    <span class="icon">
+                        <i class='bx bxs-user'></i>
+                    </span>
+                    <input type="text" name="usuario" required>
+                    <label>Usuario</label>
+                </div>
+                <div class="entradas-formulario-login">
+                    <span class="icon">
+                        <i class='bx bxs-envelope'></i>
+                    </span>
+                    <input type="email" name="email" required>
+                    <label>Email</label>
+                </div>
+                <div class="entradas-formulario-login">
+                    <span class="icon">
+                        <i class='bx bxs-lock-alt'></i>
+                    </span>
+                    <input type="password" name="password" required>
+                    <label>Contraseña</label>
+                </div>
+                <div class="recuérdame">
+                    <label><input type="checkbox" name="terms" required>Estoy de acuerdo con los términos y condiciones
+                    </label>
+                    <a href="/terminos_condiciones" class="register-link">Términos y condiciones</a>
+                </div>
+                <button type="submit" class="btn-login">Enviar</button>
+                <div class="registrate">
+                    <p>¿Ya tienes tu cuenta? <a href="/login" class="register-link">¡Entra!</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>

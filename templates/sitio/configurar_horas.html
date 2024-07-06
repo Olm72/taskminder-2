@@ -1,0 +1,16 @@
+{% include 'sitio/cabecera_taskminder_app.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
+
+<body>
+    <h1>Configurar Horas Disponibles</h1>
+    <form method="post">
+        {% for dia, horas in horas.items() %}
+            <label for="{{ dia }}">{{ dia }}:</label>
+            <input type="number" name="{{ dia }}" id="{{ dia }}" value="{{ horas }}">
+            <br>
+        {% endfor %}
+        <input type="submit" value="Guardar">
+    </form>
+</body>
+
+<!-- Pie de página -->
+{% include 'sitio/pie_pagina.html' %}

@@ -1,0 +1,514 @@
+/* Importo el tipo de letra de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Selector Universal */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    scrollbar-color: #44d9e8 transparent;
+}
+
+body {
+    background: #1a0932; /* Color fondo de la web */
+    font-family: 'Poppins', sans-serif;
+    color: #00fef5;
+    scrollbar-color: #44d9e8 transparent;
+}
+
+html, body {
+
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Menú */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 10%;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+
+/* TaskMinder Logo */
+.logo {
+    font-size: 25px;
+    color: #f8f9fa; /* Color letras menú TaskMinder */
+    text-decoration: none;
+    font-weight: 600;
+    opacity: 0;
+    text-shadow: 0px 0px 5px #00fef5; /* Efecto neón "Taskminder" menú */
+    animation: zoomOut 1.3s ease forwards; /* Animación del logo del menú */
+}
+
+.logo:hover {
+    color: #f8f9fa;
+}
+
+/* Color resto de elementos del menú */
+.navbar a {
+    display: inline-block;
+    font-size: 18px;
+    color: #f8f9fa;
+    text-decoration: none;
+    font-weight: 500;
+    margin: 0 20px;
+    transition: .3s; /* Tiempo que tardan en cambiar de color los elementos del menú cuando les pasas por encima con el ratón */
+    opacity: 0;
+    text-shadow: 0px 0px 5px #6f42c1; /* Efecto neón objetos menú */
+    animation: slideTop 1s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+}
+
+.navbar a:hover,
+.navbar a.active {
+    color: #fec10c; /* Color al que cambian los elementos del menú al pasarles por encima; al escribir a.active también la palabra inicio del menú se mantiene en este color */
+}
+
+/* Social Media */
+.social-media {
+    display:flex;
+    justify-content: space-between;
+    width: 150px;
+    height: 40px;
+    text-shadow: 0px 0px 2px #6f42c1; /* Efecto neón redes sociales */
+}
+
+.social-media a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: transparent; /* Color red social del cuadrado invertido */
+    border: 2px solid transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    transform: rotate(45deg);
+    transition: .5s;
+    opacity: 0;
+    animation: slideSci 1s ease forwards; /* Animación del los elementos del menú que no son el logo */
+    animation-delay: calc(.2s * var(--i));
+}
+
+.social-media a:hover {
+    border-color: #00fef5; /* Color red social del cuadrado invertido al pasar por encima */
+    box-shadow: 0px 0px 5px #f8f9fa;
+}
+
+.social-media a i {
+    font-size: 24px;
+    color: #fec10c; /* Color red social icono */
+    transform: rotate(-45deg);
+}
+
+/* Botón "TaskMinder App" */
+.inicio {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 8% 0;
+    overflow: hidden;
+}
+
+.inicio-contenido {
+    max-width: 630px;
+}
+
+/* Keyframes Animation */
+/* Logo animación */
+@keyframes zoomOut {
+    0% {
+        transform: scale(2);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Resto de objetos del menú */
+@keyframes slideTop {
+    0% {
+        transform: scale(1);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Redes sociales */
+@keyframes slideSci {
+    0% {
+        transform: translateX(100px) rotate(45deg);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0) rotate(45deg);
+        opacity: 1;
+    }
+}
+
+/* Estilos para el pie de página */
+.footer {
+    background-color: transparent;
+    padding: 20px;
+    text-align: center;
+}
+
+.redes-sociales {
+    display: flex;
+    justify-content: center; /* Centrar horizontalmente los iconos */
+    gap: 60px; /* Ajustar el espaciado entre los iconos */
+}
+
+.redes-sociales a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: transparent; /* Color red social del cuadrado invertido */
+    border: 2px solid transparent;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.5s, box-shadow 0.5s;
+    transform: rotate(45deg);
+}
+
+.redes-sociales a:hover {
+    border-color: #00fef5; /* Color red social del cuadrado invertido al pasar por encima */
+    box-shadow: 0px 0px 5px #f8f9fa;
+}
+
+.redes-sociales a i {
+    font-size: 24px;
+    color: #fec10c; /* Color red social icono */
+    transform: rotate(-45deg);
+}
+
+usuario-conectado-mensaje {
+    color: #04f5ec;
+    margin-top: 20px;
+}
+
+
+
+/* Taskminder APP */
+body.taskminder, .body-taskminder {
+    background-image: url("taskminder_web_design_def_background2.png");
+    color: #04f5ec;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+}
+
+h1.taskminder, h1.h1-taskminder {
+    text-align: center;
+    margin-top: 100px;
+}
+
+h2.taskminder {
+    text-align: center;
+    margin-top: 20px;
+}
+
+form.taskminder, .formulario-grupo-taskminder {
+    margin-bottom: 15px;
+    color: #04f5ec;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+label.taskminder, .formulario-grupo-etiqueta-taskminder {
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+.checkbox-group.taskminder, .checkbox-group.taskminder label {
+    flex-wrap: wrap;
+    border-radius: 10px;
+    margin-right: 10px;
+}
+
+button.taskminder, .botones-taskminder button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+
+/* Estilos para inputs de texto */
+input[type="text"],
+input[type="number"],
+input[type="time"] {
+    width: 30%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #e638b7;
+    color: #04f5ec;
+}
+
+/* Placeholder color */
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+input[type="time"]::placeholder {
+    color: #04f5ec;
+}
+
+/* Placeholder color */
+input[type="text"]::-webkit-input-placeholder,
+input[type="number"]::-webkit-input-placeholder,
+input[type="time"]::-webkit-input-placeholder {
+    color: #04f5ec; /* Color del placeholder */
+}
+
+/* Estilos para inputs de número en focus */
+input[type="number"]:focus {
+    border-color: #e638b7;
+    box-shadow: 0 0 5px #66afe9;
+    outline: none;
+}
+
+/* Estilos para placeholder */
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+input[type="time"]::placeholder,
+select::placeholder {
+    color: #04f5ec;
+}
+
+/* Estilos para selects */
+select {
+    width: 26%;
+    padding: 10px 20px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    border: none;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #e638b7;
+    color: #04f5ec;
+}
+
+/* Estilos para los textos de las opciones del seleccionable de prioridad */
+select#prioridad option[value="3"],
+select#prioridad option[value="2"],
+select#prioridad option[value="1"],
+select#prioridad option[value="0"]{
+    color: #04f5ec;
+}
+
+.checkbox-group input[type="checkbox"] + label::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #e638b7;
+    color: #04f5ec;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label::before {
+    background-color: #04f5ec; /* Color del fondo del checkbox cuando está seleccionado */
+}
+
+.checkbox-group input[type="checkbox"] + label::after {
+    content: "\2713"; /* Símbolo de verificación */
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px; /* Centrar verticalmente */
+    text-align: center; /* Centrar horizontalmente */
+    font-size: 14px; /* Tamaño del símbolo de verificación */
+    color: transparent; /* Ocultar el símbolo de verificación */
+}
+
+.checkbox-group input[type="checkbox"]:checked + label::after {
+    color: #04f5ec; /* Color del símbolo de verificación cuando está seleccionado */
+}
+
+.accordion.taskminder {
+    background-color: #6f42c1;
+    color: #04f5ec;
+    cursor: pointer;
+    padding: 20px;
+    width: 100%;
+    border: none;
+    text-align: center;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+    border-radius: 10px;
+}
+
+.panel.taskminder {
+    padding: 10px 20px;
+    background-color: transparent;
+    transition: max-height 0.2s ease-out;
+    text-align: center;
+    display: none;
+}
+
+/* Horario que muestra las tareas en Taskminder APP */
+.horario.taskminder {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.dia.taskminder {
+    border: 1px solid #6f42c1;
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Botón agregar tareas en Taskminder APP */
+.button-container-primer-boton-guardar-cambios-semana {
+    text-align: center;
+    margin-top: 10px;
+}
+
+#agregar-tarea-btn {
+    background-color: #04ff00 ;
+    color: #1a0932;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin: auto;
+}
+
+#agregar-tarea-btn:hover {
+    background-color: #04f5ec;
+    color: #e638b7;
+}
+
+/* Estilos para el mensaje de conectado.html */
+.cerrar_sesion h1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #04f5ec;
+    font-size: 24px;
+}
+
+/* Estilos para html conectado y botón cerrar sesión */
+.conectado_pagina {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+/* Estilos de los botones de conectado: taskminder app y cerrar sesión*/
+.boton-conectado {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 150%;
+    padding: 20px;
+    background: #fec10c;
+    border: 2px solid #ffe63f;
+    border-radius: 10px;
+    font-size: 18px;
+    color: #1a0932;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1;
+    overflow: hidden;
+    transition: .5s;
+    text-shadow: 0px 0px 5px #6f42c1;
+    box-shadow: 0px 0px 10px #f8f9fa;
+}
+
+/* Cambios que producen los botones de conectado.html */
+.boton-conectado:hover {
+    color: #00fef5;
+    background: #e638b7; /* Color al que cambiarán los botones al pasar por encima */
+}
+
+/* Estilos para los mensajes flash */
+.flash-mensaje-contacto {
+    position: fixed; /* Establece la posición fija en la ventana del navegador */
+    top: 90px; /* Ajusta este valor según la altura de tu menú */
+    left: 50%; /* Posiciona el elemento en la mitad horizontal de la pantalla */
+    transform: translateX(-50%); /* Centra el elemento horizontalmente */
+    margin: 0; /* Elimina los márgenes por si acaso */
+}
+
+.alerta {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.alerta-éxito {
+    color: #04ff00;
+    background-color: transparent;
+    border-color: transparent;
+}
+
+/*Estilo para las tareas que se muestran en el horario*/
+.tarea-item {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.tarea-item h4 {
+    margin-top: 0;
+}
+
+.tarea-item p {
+    margin: 5px 0;
+}
+
+.tarea-item button {
+    margin-right: 5px;
+}
