@@ -16,10 +16,11 @@ body {
     font-family: 'Poppins', sans-serif;
     color: #00fef5;
     scrollbar-color: #44d9e8 transparent;
+    display: flex;
+    flex-direction: column;
 }
 
 html, body {
-
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -76,7 +77,7 @@ html, body {
 
 /* Social Media */
 .social-media {
-    display:flex;
+    display: flex;
     justify-content: space-between;
     width: 150px;
     height: 40px;
@@ -206,8 +207,6 @@ usuario-conectado-mensaje {
     margin-top: 20px;
 }
 
-
-
 /* Taskminder APP */
 body.taskminder, .body-taskminder {
     background-image: url("taskminder_web_design_def_background2.png");
@@ -261,12 +260,11 @@ button.taskminder, .botones-taskminder button {
     margin-bottom: 20px;
 }
 
-
 /* Estilos para inputs de texto */
 input[type="text"],
 input[type="number"],
 input[type="time"] {
-    width: 30%;
+    width: 38%;
     padding: 10px;
     margin-top: 10px;
     margin-bottom: 20px;
@@ -323,7 +321,7 @@ select {
 select#prioridad option[value="3"],
 select#prioridad option[value="2"],
 select#prioridad option[value="1"],
-select#prioridad option[value="0"]{
+select#prioridad option[value="0"] {
     color: #04f5ec;
 }
 
@@ -357,26 +355,66 @@ select#prioridad option[value="0"]{
     color: #04f5ec; /* Color del símbolo de verificación cuando está seleccionado */
 }
 
+/* Estilos para acordeones y paneles */
 .accordion.taskminder {
-    background-color: #6f42c1;
-    color: #04f5ec;
     cursor: pointer;
-    padding: 20px;
+    padding: 15px;
     width: 100%;
     border: none;
-    text-align: center;
+    text-align: left;
     outline: none;
-    font-size: 15px;
     transition: 0.4s;
+    background-color: #6f42c1;
+    color: #04f5ec;
     border-radius: 10px;
 }
 
+.accordion.taskminder.active, .accordion.taskminder:hover {
+    background-color: #fec10c;
+    color: #1a0932;
+}
+
 .panel.taskminder {
-    padding: 10px 20px;
+    padding: 0 20px;
+    overflow: hidden;
     background-color: transparent;
     transition: max-height 0.2s ease-out;
     text-align: center;
+    max-height: 0;
+}
+
+.panel.taskminder.active {
     display: none;
+    max-height: none;
+}
+
+/* Asegurar que los botones no cambien de tamaño */
+button.accordion.taskminder {
+    display: block;
+    width: 100%;
+}
+
+button.accordion.taskminder:focus {
+    outline: none;
+}
+
+/* Estilos para botones adaptables */
+button.adaptable {
+    display: inline-block;  /* Asegura que el botón se ajuste al contenido */
+    padding: 10px 20px;     /* Espaciado interno para mejorar la apariencia */
+    border: none;           /* Sin borde */
+    border-radius: 10px;    /* Bordes redondeados */
+    cursor: pointer;        /* Cursor de puntero */
+    background-color: #6f42c1; /* Color de fondo del botón */
+    color: #04f5ec;         /* Color del texto del botón */
+    text-align: center;     /* Centrar el texto */
+    margin: 10px auto;      /* Margen para separación */
+    transition: background-color 0.3s, color 0.3s; /* Transiciones suaves para cambios de color */
+}
+
+button.adaptable:hover {
+    background-color: #e638b7; /* Color de fondo al pasar el ratón */
+    color: #04f5ec;            /* Color del texto al pasar el ratón */
 }
 
 /* Horario que muestra las tareas en Taskminder APP */
@@ -402,8 +440,8 @@ select#prioridad option[value="0"]{
     margin-top: 10px;
 }
 
-#agregar-tarea-btn {
-    background-color: #04ff00 ;
+#guardar-tiempo-btn, #agregar-tarea-btn {
+    background-color: #04ff00;
     color: #1a0932;
     padding: 10px 20px;
     border: none;
@@ -415,7 +453,7 @@ select#prioridad option[value="0"]{
     margin: auto;
 }
 
-#agregar-tarea-btn:hover {
+#guardar-tiempo-btn:hover, #agregar-tarea-btn:hover {
     background-color: #04f5ec;
     color: #e638b7;
 }
@@ -440,7 +478,7 @@ select#prioridad option[value="0"]{
     text-align: center;
 }
 
-/* Estilos de los botones de conectado: taskminder app y cerrar sesión*/
+/* Estilos de los botones de conectado: taskminder app y cerrar sesión */
 .boton-conectado {
     position: relative;
     justify-content: center;
@@ -492,7 +530,7 @@ select#prioridad option[value="0"]{
     border-color: transparent;
 }
 
-/*Estilo para las tareas que se muestran en el horario*/
+/* Estilo para las tareas que se muestran en el horario */
 .tarea-item {
     background-color: #f5f5f5;
     border: 1px solid #ddd;
@@ -511,4 +549,62 @@ select#prioridad option[value="0"]{
 
 .tarea-item button {
     margin-right: 5px;
+}
+
+/* Estilos para el contenedor y las tareas */
+#horario-container .dia {
+    border: 2px solid #e638b7;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+#horario-container .tarea-guardada {
+    background-color: #e638b7;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    color: #fff;
+    text-align: center;
+}
+
+/* Estilos para los botones */
+.btn-modificar, .btn-borrar {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    padding: 10px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-modificar {
+    background-color: #04ff00;
+    color: #000;
+}
+
+.btn-borrar {
+    background-color: #ff0000;
+    color: #fff;
+}
+
+/* Estilos para el checkbox */
+.tarea-realizada {
+    position: relative;
+    top: 5px;
+    margin-right: 5px;
+}
+
+.tarea-realizada + label {
+    display: inline-block;
+    background-color: #fec10c;
+    padding: 5px;
+    border-radius: 5px;
+    color: #000;
+}
+
+.tarea-realizada:checked + label {
+    background-color: #04f5ec;
 }

@@ -1,18 +1,29 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from models import db
+from flask import Flask
+import os
 
-# Creamos la DB "task_minder_db.db" que se encuentra en la carpeta "database"
-engine = create_engine('sqlite:///database/task_minder_db.db',
-                       connect_args={"check_same_thread": False})
+app = Flask(__name__)
 
-# Ahora creamos la sesión, lo que nos permite realizar transacciones dentro de nuestra DB
+base_dir = os.path.abspath(os.path.dirname(__file__))
+database_dir = os.path.join(base_dir, 'database')
+database_path = os.path.join(database_dir, 'task_minder_db.db')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_path}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+if not os.path.exists(database_dir):
+    os.makedirs(database_dir)
+
+engine = create_engine(f'sqlite:///{database_path}')
+
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# Ahora vamos al fichero "models.py" - modelos (clases) donde queremos que se transformen en tablas, le añadiremos
-# esta variable y esto se encargará de mapear y vincular cada clase a cada tabla
-Base = declarative_base()
+with app.app_context():
+    db.create_all()
 
-# Crear las tablas en la base de datos
-Base.metadata.create_all(engine)
+print("Tablas creadas con éxito.")

@@ -2,26 +2,41 @@
 
 <body class="taskminder">
     <h1 class="taskminder">Taskminder</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+    <p>Horas totales disponibles: {{ horas_totales_disponibles }} horas</p>
+
+    <!-- Form para configurar horas -->
     <form class="taskminder" method="POST" action="{{ url_for('configurar_horas') }}">
-        <button type="button" class="accordion taskminder">Tiempo disponible de cada día de la semana</button>
+        <button type="button" class="accordion taskminder">Entra aquí para definir tu tiempo disponible durante la semana</button>
         <div class="panel taskminder">
-            {% for dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] %}
+            {% for dia in ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'] %}
                 <label class="taskminder" for="tiempo-{{ dia|lower }}">{{ dia }} (en minutos):</label>
-                <input type="number" id="tiempo-{{ dia|lower }}" name="{{ dia }}" value="{{ horas[dia] }}" placeholder="Tiempo en min" required>
+                <input type="number" id="tiempo-{{ dia|lower }}" name="{{ dia|lower }}" placeholder="Tiempo en min" required>
             {% endfor %}
 
             <div class="button-container-primer-boton-guardar-cambios-semana">
-                <button id="agregar-tarea-btn" class="taskminder" onclick="agregarTarea()">Guardar cambios</button>
+                <button type="submit" id="guardar-tiempo-btn" class="taskminder">Guardar cambios</button>
             </div>
         </div>
+    </form>
 
-        <button type="button" class="accordion taskminder">Entra aquí para agregar tareas</button>
-        <div class="panel taskminder">
-            <label class="taskminder" for="contenido">Añadir tarea:</label>
-            <input type="text" id="contenido" placeholder="Nombre de tu tarea">
+<!-- Form para agregar tareas y configurar alarmas -->
+<form class="taskminder" method="POST" action="{{ url_for('agregar_tarea') }}">
+    <button type="button" class="accordion taskminder adaptable">Entra aquí para agregar tus tareas</button>
+    <div class="panel taskminder">
+        <label class="taskminder" for="contenido">Añadir tarea:</label>
+        <input type="text" id="contenido" name="contenido" placeholder="Nombre de tu tarea" required>
 
             <label class="taskminder" for="prioridad">Prioridad:</label>
-            <select id="prioridad" class="taskminder">
+            <select id="prioridad" name="prioridad" class="taskminder" required>
                 <option value="3">Máxima</option>
                 <option value="2">Importante</option>
                 <option value="1">Moderada</option>
@@ -33,90 +48,81 @@
                 <div class="checkbox-group taskminder">
                     <label><input type="checkbox" name="dias_semana" value="lunes"> Lunes</label>
                     <label><input type="checkbox" name="dias_semana" value="martes"> Martes</label>
-                    <label><input type="checkbox" name="dias_semana" value="miercoles"> Miércoles</label>
+                    <label><input type="checkbox" name="dias_semana" value="miercoles"> Miercoles</label>
                     <label><input type="checkbox" name="dias_semana" value="jueves"> Jueves</label>
                     <label><input type="checkbox" name="dias_semana" value="viernes"> Viernes</label>
-                    <label><input type="checkbox" name="dias_semana" value="sabado"> Sábado</label>
+                    <label><input type="checkbox" name="dias_semana" value="sabado"> Sabado</label>
                     <label><input type="checkbox" name="dias_semana" value="domingo"> Domingo</label>
                 </div>
             </div>
 
             <label class="taskminder" for="hora_inicio">Hora de inicio:</label>
-            <input type="time" id="hora_inicio" required>
+            <input type="time" id="hora_inicio" name="hora_inicio" required>
 
             <label class="taskminder" for="tiempo">Duración (en minutos):</label>
-            <input type="number" id="tiempo" min="1" required>
-        </div>
+            <input type="number" id="tiempo" name="tiempo" min="1" required>
 
-        <button type="button" class="accordion taskminder">¿Quieres programar una alarma?</button>
-        <div class="panel taskminder">
-            <div>
-                <label class="taskminder">¿Quieres establecer una alarma?</label>
-                <label class="taskminder"><input type="radio" name="alarma" value="si"> Sí</label>
-                <label class="taskminder"><input type="radio" name="alarma" value="no"> No</label>
+            <button type="button" class="accordion taskminder">¿Quieres programar una alarma?</button>
+            <div class="panel taskminder">
+                <input type="hidden" name="index" id="index"> <!-- Este campo oculto contendrá el índice de la tarea -->
+
+                <div>
+                    <label class="taskminder">¿Quieres establecer una alarma?</label>
+                    <label class="taskminder"><input type="radio" name="alarma" value="si"> Sí</label>
+                    <label class="taskminder"><input type="radio" name="alarma" value="no"> No</label>
+                </div>
+                <div>
+                    <label class="taskminder">¿Quieres un recordatorio antes de la alarma?</label>
+                    <label class="taskminder"><input type="radio" name="recordatorio" value="si" onchange="mostrarRecordatorio()"> Sí</label>
+                    <label class="taskminder"><input type="radio" name="recordatorio" value="no" onchange="mostrarRecordatorio()"> No</label>
+                </div>
+
+                <div id="recordatorio-container" style="display: none;">
+                    <label class="taskminder" for="tiempo-recordatorio">¿Con qué antelación quieres el recordatorio (en minutos)?:</label>
+                    <input type="number" id="tiempo-recordatorio" name="tiempo_recordatorio" min="1" required>
+                </div>
+
+                <div>
+                    <label class="taskminder">¿La tarea está realizada hoy?</label>
+                    <label class="taskminder"><input type="radio" name="realizada_hoy" value="si" onchange="mostrarRecordatorio()"> Sí</label>
+                    <label class="taskminder"><input type="radio" name="realizada_hoy" value="no" onchange="mostrarRecordatorio()"> No</label>
+                </div>
             </div>
-            <div>
-                <label class="taskminder">¿Quieres un recordatorio antes de la alarma?</label>
-                <label class="taskminder"><input type="radio" name="recordatorio" value="si" onchange="mostrarRecordatorio()"> Sí</label>
-                <label class="taskminder"><input type="radio" name="recordatorio" value="no" onchange="mostrarRecordatorio()"> No</label>
+
+            <div class="button-container-primer-boton-guardar-cambios-semana">
+                <button type="submit" id="agregar-tarea-btn" class="taskminder">Agregar tarea</button>
             </div>
-
-            <div id="recordatorio-container" style="display: none;">
-                <label class="taskminder" for="tiempo-recordatorio">¿Con qué antelación quieres el recordatorio (en minutos)?:</label>
-                <input type="number" id="tiempo-recordatorio" min="1" required>
-            </div>
-
-            <div>
-                <label class="taskminder">¿La tarea está realizada hoy?</label>
-                <label class="taskminder"><input type="radio" name="realizada-hoy" value="si" onchange="mostrarRecordatorio()"> Sí</label>
-                <label class="taskminder"><input type="radio" name="realizada-hoy" value="no" onchange="mostrarRecordatorio()"> No</label>
-            </div><br>
-
-            <button id="agregar-tarea-btn" class="taskminder" onclick="agregarTarea()">Guardar cambios</button>
         </div>
     </form>
 
+    <!-- Horario semanal -->
     <div id="horario-container" class="taskminder">
         <h2 class="taskminder">Horario semanal</h2>
         <div class="horario taskminder">
+            {% for dia in ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] %}
             <div class="dia taskminder">
-                <h3>Lunes</h3>
-                <ul id="tareas-lunes" class="taskminder"></ul>
+                <h3>{{ dia|capitalize }}</h3>
+                <ul id="tareas-{{ dia }}" class="taskminder">
+                    {% for tarea in tareas[dia] %}
+                    <li class="tarea-guardada">
+                        <h4>{{ tarea.contenido }}</h4>
+                        <p>Prioridad: {{ tarea.prioridad }}</p>
+                        <p>Hora de inicio: {{ tarea.horario_inicio }}</p>
+                        <p>Duración: {{ tarea.tiempo }} minutos</p>
+                        <button class="btn-modificar" data-id="{{ tarea.id_tarea }}">Modificar</button>
+                        <button class="btn-borrar" data-id="{{ tarea.id_tarea }}">Borrar</button>
+                        <input type="checkbox" class="tarea-realizada" data-id="{{ tarea.id_tarea }}" {% if tarea.estado %}checked{% endif %}> Realizada
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="dia taskminder">
-                <h3>Martes</h3>
-                <ul id="tareas-martes" class="taskminder"></ul>
-            </div>
-            <div class="dia taskminder">
-                <h3>Miércoles</h3>
-                <ul id="tareas-miercoles" class="taskminder"></ul>
-            </div>
-            <div class="dia taskminder">
-                <h3>Jueves</h3>
-                <ul id="tareas-jueves" class="taskminder"></ul>
-            </div>
-            <div class="dia taskminder">
-                <h3>Viernes</h3>
-                <ul id="tareas-viernes" class="taskminder"></ul>
-            </div>
-            <div class="dia taskminder">
-                <h3>Sábado</h3>
-                <ul id="tareas-sabado" class="taskminder"></ul>
-            </div>
-            <div class="dia taskminder">
-                <h3>Domingo</h3>
-                <ul id="tareas-domingo" class="taskminder"></ul>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
-    <!-- Incluyo Moment.js en mi JavaScript de la app -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-
-    <!-- Archivo JavaScript -->
     <script src="{{ url_for('static', filename='taskminder_script.js') }}"></script>
 
 </body>
 
-<!-- Pie de página -->
 {% include 'sitio/pie_pagina.html' %}
