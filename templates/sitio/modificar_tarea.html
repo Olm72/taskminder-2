@@ -1,10 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
+{% include 'sitio/cabecera_taskminder_app.html' %}
+
 <body>
-$END$
+    <h1 class="taskminder">Modificar Tarea</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <br>
+    <p>Horas totales disponibles: {{ horas_totales_disponibles }} horas</p>
+
+    <form method="POST">
+        <label for="contenido_tarea">Contenido de la Tarea:</label>
+        <input type="text" id="contenido_tarea" name="contenido_tarea" value="{{ tarea.contenido_tarea }}" required>
+
+        <label for="prioridad">Prioridad:</label>
+        <input type="number" id="prioridad" name="prioridad" value="{{ tarea.prioridad }}" required>
+
+        <label for="tiempo">Tiempo:</label>
+        <input type="number" id="tiempo" name="tiempo" value="{{ tarea.tiempo }}" required>
+
+        <button type="submit">Modificar</button>
+    </form>
 </body>
-</html>
+
+{% include 'sitio/pie_pagina.html' %}

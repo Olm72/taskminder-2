@@ -46,6 +46,16 @@ html, body {
 }
 
 /* Menú */
+/* Ajustes para el contenedor del menú */
+.menu-container {
+    width: 80%;
+    margin: 0 auto;
+    background-color: transparent; /* Color de fondo del menú */
+    background: #1a0932;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
 .header {
     position: fixed;
     top: 0;
@@ -54,7 +64,7 @@ html, body {
     padding: 20px 10%;
     background: transparent;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     z-index: 100;
 }
@@ -1042,6 +1052,26 @@ button.taskminder, .botones-taskminder button {
     text-decoration: underline;
 }
 
+.btn-logout {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background: #fec10c;
+    color: #1a0932; /* Color del texto */
+    font-weight: bold; /* Negrita */
+    font-size: 18px; /* Ajusta el tamaño fuente */
+    text-align: center; /* Centra texto */
+    text-decoration: none;
+    border: 2px solid #04f5ec; /* Borde color */
+    border-radius: 10px; /* Redondez esquinas */
+    transition: background-color 0.3s, color 0.3s; /* Transición suave para cambios de color */
+}
+
+.btn-logout:hover {
+    background-color: #04f5ec ; /* Fondo al pasar el ratón por encima */
+    color: #e638b7; /* Color del texto al pasar el ratón */
+}
+
 
 /* CONTACTO */
 /* Contacto Estilos */
@@ -1548,8 +1578,8 @@ input {
 input:focus,
 input:active,
 input:-webkit-autofill {
-    background-color: #e638b7 !important; /* Color de fondo input */
-    color: #04f5ec !important; /* Color del texto ingresado */
+    background-color: transparent !important; /* Color de fondo input */
+    color: #fec10c !important; /* Color del texto ingresado */
     border: #04f5ec; /* Borde del input transparente */
     outline: none;
     border-radius: 5px;
@@ -1557,10 +1587,9 @@ input:-webkit-autofill {
 
 /* Autorelleno estilos para Chrome y Safari */
 input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px #e638b7 inset !important; /* Asegura el fondo rosa en autofill */
-    -webkit-text-fill-color: #04f5ec !important; /* Color del texto en autorelleno */
-    border-radius: 5px;
-    border: #04f5ec;
+    -webkit-box-shadow: 0 0 0px 1000px #1a0932 inset !important; /* Eliminar fondo en autofill */
+    -webkit-text-fill-color: #fec10c !important; /* Color del texto en autorelleno */
+    background-color: #1a0932 !important; /* Asegura que el fondo sea transparente */
 }
 
 /* Anula la clase de control de formulario si es necesario */

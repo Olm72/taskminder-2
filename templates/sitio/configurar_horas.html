@@ -2,13 +2,17 @@
 
 <body>
     <h1>Configurar Horas Disponibles</h1>
-    <form method="post" action="{{ url_for('configurar_horas') }}">
-        {% for dia, horas in horas.items() %}
-            <label for="{{ dia }}">{{ dia }}:</label>
-            <input type="number" name="{{ dia }}" id="{{ dia }}" value="{{ horas }}" min="0" step="1" required>
-            <br>
-        {% endfor %}
-        <input type="submit" value="Guardar">
+    <form class="taskminder" method="POST" action="{{ url_for('configurar_horas') }}">
+        <button type="button" class="accordion taskminder">Entra aquí para definir tu tiempo disponible durante la semana</button>
+        <div class="panel taskminder">
+            {% for dia in ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'] %}
+                <label class="taskminder" for="tiempo-{{ dia|lower }}">{{ dia }} (en minutos):</label>
+                <input type="number" id="tiempo-{{ dia|lower }}" name="{{ dia|lower }}" placeholder="Tiempo en min" required>
+            {% endfor %}
+            <div class="button-container-primer-boton-guardar-cambios-semana">
+                <button type="submit" id="guardar-tiempo-btn" class="taskminder">Guardar cambios</button>
+            </div>
+        </div>
     </form>
 </body>
 

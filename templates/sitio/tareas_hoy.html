@@ -1,8 +1,28 @@
 {% include 'sitio/cabecera.html' %} <!-- Aquí le digo con esta instrucción de Jinja que incluya la cabecera -->
 
-<body>
+<body class="taskminder">
+    <h1 class="taskminder">Tareas de hoy</h1>
 
-Tareas hoy
+    <div id="tareas-hoy-container" class="taskminder">
+        <ul>
+            {% for tarea in tareas %}
+                <li class="tarea-guardada">
+                    <h4>{{ tarea.contenido_tarea }}</h4>
+                    <p>Prioridad: {{ tarea.prioridad }}</p>
+                    <p>Hora de inicio: {{ tarea.horario_inicio }}</p>
+                    <p>Duración: {{ tarea.tiempo }} minutos</p>
+                    <button class="btn-modificar" data-id="{{ tarea.id_tarea }}">Modificar</button>
+                    <button class="btn-borrar" data-id="{{ tarea.id_tarea }}">Borrar</button>
+                    <button class="btn-anular-alarma" data-id="{{ tarea.id_tarea }}">Anular Alarma</button>
+                    <input type="checkbox" class="tarea-realizada" data-id="{{ tarea.id_tarea }}" {% if tarea.estado %}checked{% endif %}> Realizada
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-    <!-- Pie de página -->
-    {% include 'sitio/pie_pagina.html' %}
+    <script src="{{ url_for('static', filename='taskminder_script.js') }}"></script>
+
+</body>
+
+{% include 'sitio/pie_pagina.html' %}
+

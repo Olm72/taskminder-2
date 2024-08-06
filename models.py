@@ -1,5 +1,6 @@
 import os
-from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, Time, TIMESTAMP, ForeignKey
+from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask import Flask
@@ -63,38 +64,50 @@ class TareasHoy(db.Model):
 
 class TareasSemana(db.Model):
     __tablename__ = 'tareas_semana'
-    id_tarea = db.Column(db.Integer, primary_key=True)
-    contenido_tarea = db.Column(db.String(200), nullable=False)
-    prioridad = db.Column(db.String(50), nullable=False)
-    dias_semana = db.Column(db.String(50), nullable=False)
-    horario_inicio = db.Column(db.String(5), nullable=False)
-    tiempo = db.Column(db.Integer, nullable=False)
-    switch_alarma = db.Column(db.Boolean, default=False)
-    switch_recordatorio = db.Column(db.Boolean, default=False)
-    tiempo_recordatorio = db.Column(db.Integer, nullable=True)
-    estado = db.Column(db.Boolean, default=False)
-    id_usuario = db.Column(db.Integer, ForeignKey('usuario.id_usuario'), nullable=False)
+    id_tarea = Column(Integer, primary_key=True)
+    contenido_tarea = Column(String(200), nullable=False)
+    prioridad = Column(Integer, nullable=False)
+    dia_semana = Column(String(20), nullable=False)
+    horario_inicio = Column(Time, nullable=False)
+    tiempo = Column(Integer, nullable=False)
+    switch_alarma = Column(Boolean, default=False)
+    switch_recordatorio = Column(Boolean, default=False)
+    tiempo_recordatorio = Column(Integer, nullable=True)
+    estado = Column(Boolean, default=False)
+    id_usuario = Column(Integer, ForeignKey('usuario.id_usuario'), nullable=False)
+
+    usuario = relationship("Usuario", back_populates="tareas")
 
 class TiempoDisponible(db.Model):
     __tablename__ = 'tiempo_disponible'
-    id = db.Column(db.Integer, primary_key=True)
-    id_usuario = db.Column(db.Integer, ForeignKey('usuario.id_usuario'))
-    minutos_disponibles_lunes = db.Column(db.Integer, default=0)
-    minutos_disponibles_martes = db.Column(db.Integer, default=0)
-    minutos_disponibles_miercoles = db.Column(db.Integer, default=0)
-    minutos_disponibles_jueves = db.Column(db.Integer, default=0)
-    minutos_disponibles_viernes = db.Column(db.Integer, default=0)
-    minutos_disponibles_sabado = db.Column(db.Integer, default=0)
-    minutos_disponibles_domingo = db.Column(db.Integer, default=0)
-    horas_totales_disponibles = db.Column(db.Float, default=0.0)
+    id = Column(Integer, primary_key=True)
+    id_usuario = Column(Integer, ForeignKey('usuario.id_usuario'), nullable=False)
+    minutos_disponibles_lunes = Column(Integer, default=0)
+    minutos_disponibles_martes = Column(Integer, default=0)
+    minutos_disponibles_miercoles = Column(Integer, default=0)
+    minutos_disponibles_jueves = Column(Integer, default=0)
+    minutos_disponibles_viernes = Column(Integer, default=0)
+    minutos_disponibles_sabado = Column(Integer, default=0)
+    minutos_disponibles_domingo = Column(Integer, default=0)
+    horas_totales_disponibles_col = Column(Float, default=0.0)
+
+    usuario = relationship("Usuario", back_populates="tiempo_disponible")
 
     @property
-    def horas_totales_disponibles_de_tiempo_disponible(self):
-        total_minutos = (self.minutos_disponibles_lunes + self.minutos_disponibles_martes +
-                         self.minutos_disponibles_miercoles + self.minutos_disponibles_jueves +
-                         self.minutos_disponibles_viernes + self.minutos_disponibles_sabado +
-                         self.minutos_disponibles_domingo)
+    def horas_totales_disponibles(self):
+        total_minutos = (
+            self.minutos_disponibles_lunes +
+            self.minutos_disponibles_martes +
+            self.minutos_disponibles_miercoles +
+            self.minutos_disponibles_jueves +
+            self.minutos_disponibles_viernes +
+            self.minutos_disponibles_sabado +
+            self.minutos_disponibles_domingo
+        )
         return total_minutos / 60
+
+    def actualizar_horas_totales(self):
+        self.horas_totales_disponibles_col = self.horas_totales_disponibles
 
 class Usuario(db.Model, UserMixin):
     __tablename__ = 'usuario'
@@ -104,8 +117,17 @@ class Usuario(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     activo = db.Column(db.Boolean, default=True)
 
+    tiempo_disponible = relationship("TiempoDisponible", back_populates="usuario")
+    tareas = relationship("TareasSemana", back_populates="usuario")  # Para relación con TareasSemana
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def get_id(self):
+        return str(self.id_usuario)
+
+    def is_active(self):
+        return self.activo
