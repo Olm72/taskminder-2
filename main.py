@@ -269,7 +269,6 @@ def taskminder():
                 tarea.tiempo = int(tarea.tiempo)
                 tareas_por_dia[dia].append(tarea)
 
-        # Calcular la hora de la próxima alarma considerando que la actual ya pasó
         primera_tarea = tareas[0]
         hora_alarma = calcular_proxima_alarma(primera_tarea.dia_semana, primera_tarea.horario_inicio)
         contenido_tarea = primera_tarea.contenido_tarea
@@ -289,7 +288,6 @@ def taskminder():
         proximoRecordatorio = None
         tarea_id = None
 
-    # Renderizar la página con la información
     return render_template('sitio/taskminder.html', tareas=tareas_por_dia, horas=horas,
                            horas_totales_disponibles=horas_totales_disponibles,
                            alarma_formateada=hora_alarma.strftime('%Y-%m-%d %H:%M:%S') if hora_alarma else None,
