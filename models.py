@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, Integer, String, Boolean, Float, Time, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, Time, TIMESTAMP, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -70,6 +70,8 @@ class TareasSemana(db.Model):
     dia_semana = Column(String(20), nullable=False)
     horario_inicio = Column(Time, nullable=False)
     tiempo = Column(Integer, nullable=False)
+    tiempo_original = Column(Integer, nullable=False)
+    historial_tiempos = Column(JSON, default=list)
     switch_alarma = Column(Boolean, default=False)
     switch_recordatorio = Column(Boolean, default=False)
     tiempo_recordatorio = Column(Integer, nullable=True)
@@ -77,6 +79,11 @@ class TareasSemana(db.Model):
     id_usuario = Column(Integer, ForeignKey('usuario.id_usuario'), nullable=False)
 
     usuario = relationship("Usuario", back_populates="tareas")
+
+    def __init__(self, *args, **kwargs):
+        super(TareasSemana, self).__init__(*args, **kwargs)
+        if self.historial_tiempos is None:
+            self.historial_tiempos = [self.tiempo]
 
 class TiempoDisponible(db.Model):
     __tablename__ = 'tiempo_disponible'
