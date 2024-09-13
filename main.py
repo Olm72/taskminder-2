@@ -39,7 +39,7 @@ scheduler.start()
 # Configuración del logger para depuración
 logging.basicConfig(level=logging.DEBUG)
 
-# Configuración de la base de datos
+# Configuración de la BBDD
 base_dir = os.path.abspath(os.path.dirname(__file__))
 database_dir = os.path.join(base_dir, 'database')
 database_path = os.path.join(database_dir, 'task_minder_db.db')
@@ -50,7 +50,7 @@ if not os.path.exists(database_dir):
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + database_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Inicialización de la base de datos
+# Inicialización de la BBDD
 db.init_app(app)
 
 # Función que se ejecuta antes de cada solicitud para almacenar las cookies.
@@ -269,6 +269,7 @@ def taskminder():
                 tarea.tiempo = int(tarea.tiempo)
                 tareas_por_dia[dia].append(tarea)
 
+        # Calculamos la hora de la próxima alarma considerando que la actual ya pasó
         primera_tarea = tareas[0]
         hora_alarma = calcular_proxima_alarma(primera_tarea.dia_semana, primera_tarea.horario_inicio)
         contenido_tarea = primera_tarea.contenido_tarea
@@ -288,12 +289,325 @@ def taskminder():
         proximoRecordatorio = None
         tarea_id = None
 
+    # Renderizamos la página con la información
     return render_template('sitio/taskminder.html', tareas=tareas_por_dia, horas=horas,
                            horas_totales_disponibles=horas_totales_disponibles,
                            alarma_formateada=hora_alarma.strftime('%Y-%m-%d %H:%M:%S') if hora_alarma else None,
                            contenido_tarea=contenido_tarea, tiempo_recordatorio=tiempo_recordatorio,
                            proximoRecordatorio=proximoRecordatorio, tarea_id=tarea_id)
 
+@app.route('/agregar_tarea', methods=['POST'])
+@login_required
+def agregar_tarea():
+    try:
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
+
+        contenido_tarea = data.get('contenido_tarea')
+        if contenido_tarea is None:
+            return jsonify({"error": "Introduce el contenido de la tarea por favor"}), 400
+
+        prioridad = int(data.get('prioridad'))
+        dias_semana = data.get('dias_semana')
+        if not dias_semana:
+            return jsonify({"error": "Selecciona al menos un día de la semana"}), 400
+
+        horario_inicio = data.get('horario_inicio')
+        if horario_inicio is None:
+            return jsonify({"error": "Introduce el horario por favor"}), 400
+
+        horario_inicio = datetime.strptime(horario_inicio, '%H:%M').time()
+
+        try:
+            tiempo = int(data.get('tiempo', 0))
+        except ValueError:
+            return jsonify({"error": "Tiempo no es un número válido"}), 400
+
+        switch_alarma = data.get('alarma') == True
+        switch_recordatorio = data.get('recordatorio') == True
+        tiempo_recordatorio = int(data.get('tiempo_recordatorio', 0)) if data.get('tiempo_recordatorio') else None
+
+        estado = data.get('realizada_hoy') == True
+
+        id_tarea = data.get("index")
+        if id_tarea:
+            session.query(TareasSemana).filter_by(id_tarea=id_tarea, id_usuario=current_user.id_usuario).delete()
+            session.commit()
+
+        tareas_creadas = []
+        for dia in dias_semana:
+            nueva_tarea = TareasSemana(
+                contenido_tarea=contenido_tarea,
+                prioridad=prioridad,
+                dia_semana=dia,
+                horario_inicio=horario_inicio,
+                tiempo=tiempo,
+                tiempo_original=tiempo,
+                historial_tiempos=[tiempo],
+                switch_alarma=switch_alarma,
+                switch_recordatorio=switch_recordatorio,
+                tiempo_recordatorio=tiempo_recordatorio,
+                estado=estado,
+                id_usuario=current_user.id_usuario
+            )
+            session.add(nueva_tarea)
+            session.commit()
+
+            # Actualiza el historial de otras tareas del mismo día
+            otras_tareas = session.query(TareasSemana).filter_by(dia_semana=dia, id_usuario=current_user.id_usuario).filter(TareasSemana.id_tarea != nueva_tarea.id_tarea).all()
+            for otra_tarea in otras_tareas:
+                otra_tarea.historial_tiempos.append(otra_tarea.tiempo)
+            session.commit()
+
+            if switch_alarma:
+                programar_alarma(nueva_tarea, switch_alarma, switch_recordatorio)
+
+            if switch_recordatorio and tiempo_recordatorio:
+                programar_recordatorio(nueva_tarea, switch_alarma, switch_recordatorio)
+
+            # Ajustamos los tiempos para cada día
+            ajustar_tiempos_tareas(dia, get_minutos_disponibles(dia))
+
+            tareas_creadas.append(nueva_tarea)
+
+        # Calculamos la próxima alarma basándonos en la primera tarea creada
+        if tareas_creadas:
+            proxima_alarma = calcular_proxima_alarma(tareas_creadas[0].dia_semana, tareas_creadas[0].horario_inicio)
+        else:
+            proxima_alarma = None
+
+        flash('Tarea guardada con éxito', 'success')
+
+    except Exception as e:
+        session.rollback()
+        app.logger.error(f"Error al agregar la tarea: {str(e)}")
+        return jsonify({"error": "Error al agregar la tarea: " + str(e)}), 500
+
+    if proxima_alarma:
+        return jsonify({"success": True, "proxima_alarma": proxima_alarma.strftime('%Y-%m-%d %H:%M:%S')})
+    else:
+        return jsonify({"success": True})
+
+@app.route('/posponer_alarma', methods=['POST'])
+@login_required
+def posponer_alarma():
+    try:
+        data = request.form
+        id_tarea = int(data.get('id_tarea'))
+        tiempo_posponer = int(data.get('tiempo_posponer', 0))  # Tiempo en minutos
+
+        tarea = session.query(TareasSemana).filter_by(id_tarea=id_tarea, id_usuario=current_user.id_usuario).first()
+
+        if not tarea:
+            flash('Tarea no encontrada.', 'error')
+            return jsonify({"error": "Tarea no encontrada"}), 404
+
+        # Para posponer el horario de inicio de la tarea
+        nuevo_horario_inicio = (datetime.combine(datetime.today(), tarea.horario_inicio) + timedelta(minutes=tiempo_posponer)).time()
+        tarea.horario_inicio = nuevo_horario_inicio
+
+        session.commit()
+
+        # Recalculamos tiempos de todas las tareas
+        tareas = session.query(TareasSemana).filter_by(id_usuario=current_user.id_usuario).order_by(TareasSemana.horario_inicio).all()
+        tiempo_disponible = session.query(TiempoDisponible).filter_by(id_usuario=current_user.id_usuario).first().horas_totales_disponibles * 60  # Convertimos a minutos
+        reestructurar_tareas(tareas, tiempo_disponible)
+
+        flash('Tarea pospuesta ' + str(tiempo_posponer) + ' minutos.', 'success')
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        flash('Error al posponer la tarea: ' + str(e), 'error')
+        return jsonify({"error": "Error interno del servidor: " + str(e)}), 500
+
+@app.route('/configurar_alarma', methods=['POST'])
+@login_required
+def configurar_alarma():
+    index = int(request.form.get('index'))
+    tarea = session.query(TareasSemana).filter_by(id_tarea=index, id_usuario=current_user.id_usuario).first()
+
+    if not tarea:
+        flash('Tarea no encontrada', 'error')
+        return redirect(url_for('taskminder'))
+
+    hora_alarma = datetime.combine(datetime.today(), tarea.horario_inicio)
+    tiempo_recordatorio = tarea.tiempo_recordatorio
+
+    app.logger.info("Programando alarma para %s a las %s", tarea.contenido_tarea, hora_alarma)
+
+    job_alarma = scheduler.add_job(alarma, 'date', run_date=hora_alarma, args=[tarea])
+    app.logger.info("Alarma programada con ID: %s", job_alarma.id)
+
+    if tiempo_recordatorio:
+        hora_recordatorio = hora_alarma - timedelta(minutes=tiempo_recordatorio)
+        app.logger.info("Programando recordatorio para %s a las %s", tarea.contenido_tarea, hora_recordatorio)
+        job_recordatorio = scheduler.add_job(recordatorio, 'date', run_date=hora_recordatorio, args=[tarea])
+        app.logger.info("Recordatorio programado con ID: %s", job_recordatorio.id)
+
+    flash('Alarma configurada con éxito para la tarea.')
+    return redirect(url_for('taskminder'))
+
+@app.route('/borrar_tarea', methods=['POST'])
+@login_required
+def borrar_tarea():
+    data = request.get_json() if request.is_json else request.form.to_dict()
+
+    try:
+        tarea_id = int(data['id_tarea'])
+        tarea = session.query(TareasSemana).filter_by(id_tarea=tarea_id, id_usuario=current_user.id_usuario).first()
+
+        if tarea:
+            dia_semana = tarea.dia_semana
+
+            # Obtenemos todas las tareas del día antes de borrar
+            tareas_del_dia = session.query(TareasSemana).filter_by(dia_semana=dia_semana, id_usuario=current_user.id_usuario).all()
+
+            # Borrar la tarea
+            session.delete(tarea)
+            session.commit()
+
+            # Restaura los tiempos de las tareas restantes
+            tareas_restantes = [t for t in tareas_del_dia if t.id_tarea != tarea_id]
+
+            if len(tareas_restantes) == len(tareas_del_dia) - 1:
+                for t in tareas_restantes:
+                    if len(t.historial_tiempos) > 1:
+                        t.tiempo = t.historial_tiempos[-2]  # Vuelve al tiempo anterior
+                        t.historial_tiempos = t.historial_tiempos[:-1]  # Elimina el último tiempo del historial
+                    else:
+                        t.tiempo = t.tiempo_original
+
+            session.commit()
+
+            # Reajustamos tiempos si es necesario
+            minutos_disponibles = get_minutos_disponibles(dia_semana)
+            if sum(t.tiempo for t in tareas_restantes) > minutos_disponibles:
+                ajustar_tiempos_tareas(dia_semana, minutos_disponibles)
+
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({'error': 'Tarea no encontrada'}), 404
+    except Exception as e:
+        session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/modificar_tarea/<int:index>', methods=['GET', 'POST'])
+@login_required
+def modificar_tarea(index):
+    tarea = session.query(TareasSemana).filter_by(id_tarea=index, id_usuario=current_user.id_usuario).first()
+
+    # Verificamos que la tarea pertenece al usuario actual
+    if not tarea:
+        flash('Tarea no encontrada o no tienes permisos para modificarla.')
+        return redirect(url_for('taskminder'))
+
+    if request.method == 'POST':
+        tarea.contenido_tarea = request.form.get('contenido_tarea')
+        try:
+            tarea.prioridad = int(request.form.get('prioridad'))
+            tarea.tiempo = int(request.form.get('tiempo'))
+        except ValueError:
+            flash('Por favor, introduce valores válidos para prioridad y tiempo.')
+            return redirect(url_for('taskminder', id_tarea=index))
+        session.commit()
+        flash('Tarea modificada con éxito')
+        return redirect(url_for('taskminder'))
+
+    return render_template('modificar_tarea.html', tarea=tarea, id_tarea=index)
+
+@app.route('/eliminar_tarea/<int:index>', methods=['POST'])
+@login_required
+def eliminar_tarea(index):
+    logging.info(f"Iniciando eliminación de tarea con ID: {index}")
+    tarea = session.query(TareasSemana).filter_by(id_tarea=index, id_usuario=current_user.id_usuario).first()
+    if not tarea:
+        logging.warning(f"Tarea con ID {index} no encontrada")
+        flash('Tarea no encontrada')
+        return redirect(url_for('taskminder'))
+
+    dia_semana = tarea.dia_semana
+    logging.info(f"Tarea encontrada. Día de la semana: {dia_semana}")
+
+    # Obtenemos todas las tareas del día antes de eliminar
+    tareas_del_dia = session.query(TareasSemana).filter_by(dia_semana=dia_semana, id_usuario=current_user.id_usuario).all()
+    logging.info(f"Número de tareas en el día antes de eliminar: {len(tareas_del_dia)}")
+
+    session.delete(tarea)
+    session.commit()
+    logging.info(f"Tarea con ID {index} eliminada")
+
+    # Restauramos tiempos de las tareas restantes
+    tareas_restantes = session.query(TareasSemana).filter_by(dia_semana=dia_semana, id_usuario=current_user.id_usuario).all()
+    logging.info(f"Número de tareas restantes: {len(tareas_restantes)}")
+
+    for t in tareas_restantes:
+        logging.info(f"Procesando tarea restante ID {t.id_tarea}")
+        logging.info(f"Historial de tiempos actual: {t.historial_tiempos}")
+        if len(t.historial_tiempos) > 1:
+            t.tiempo = t.historial_tiempos[-2]  # Volver al tiempo anterior
+            t.historial_tiempos.pop()  # Eliminar el último tiempo del historial
+            logging.info(f"Restaurando tiempo anterior: {t.tiempo}")
+            logging.info(f"Nuevo historial de tiempos: {t.historial_tiempos}")
+        else:
+            t.tiempo = t.tiempo_original
+            logging.info(f"Restaurando tiempo original: {t.tiempo}")
+
+    session.commit()
+    logging.info("Cambios guardados en la base de datos")
+
+    # Reajustamos tiempos si es necesario
+    minutos_disponibles = get_minutos_disponibles(dia_semana)
+    logging.info(f"Minutos disponibles para el día {dia_semana}: {minutos_disponibles}")
+    if sum(t.tiempo for t in tareas_restantes) > minutos_disponibles:
+        logging.info("Se requiere reajuste de tiempos")
+        ajustar_tiempos_tareas(dia_semana, minutos_disponibles)
+    else:
+        logging.info("No se requiere reajuste de tiempos")
+
+    flash('Tarea eliminada con éxito.')
+    return redirect(url_for('taskminder'))
+
+@app.route('/actualizar_tarea', methods=['POST'])
+@login_required
+def actualizar_tarea():
+    data = request.json
+    id_tarea = data.get('id_tarea')
+    estado = data.get('estado')
+
+    app.logger.info(f"Actualizando tarea: id={id_tarea}, estado={estado}")
+
+    tarea = session.query(TareasSemana).filter_by(id_tarea=id_tarea, id_usuario=current_user.id_usuario).first()
+
+    if tarea:
+        tarea.estado = estado
+        try:
+            session.commit()
+            app.logger.info(f"Tarea actualizada correctamente: id={id_tarea}")
+            return jsonify({"success": True}), 200
+        except Exception as e:
+            session.rollback()
+            app.logger.error(f"Error al actualizar tarea: {str(e)}")
+            return jsonify({"error": "Error al actualizar la tarea en la base de datos"}), 500
+    else:
+        app.logger.error(f"Tarea no encontrada: id={id_tarea}")
+        return jsonify({"error": "Tarea no encontrada"}), 404
+
+@app.route('/obtener_tareas')
+@login_required
+def obtener_tareas():
+    tareas = session.query(TareasSemana).filter_by(id_usuario=current_user.id_usuario).all()
+    tareas_dict = [{'id': tarea.id_tarea, 'contenido_tarea': tarea.contenido_tarea, 'prioridad': tarea.prioridad,
+                    'dia_semana': tarea.dia_semana, 'horario_inicio': tarea.horario_inicio,
+                    'tiempo': tarea.tiempo, 'realizada': tarea.estado} for tarea in tareas]
+    return jsonify({'tareas': tareas_dict})
+
+@app.route("/tareas_hoy")
+@login_required
+def tareas_hoy():
+    return render_template('sitio/tareas_hoy.html')
+
+# Control tiempo y horarios:
 @app.route('/reemplazar_tiempo_disponible', methods=['POST'])
 @login_required
 def reemplazar_tiempo_disponible():
@@ -330,106 +644,6 @@ def reemplazar_tiempo_disponible():
     session.commit()
 
     return jsonify({"success": True, "message": "Tiempo disponible reemplazado correctamente"})
-
-def calcular_proxima_alarma(dia_semana, hora):
-
-    # Aseguramos que la variable 'hora' es de tipo datetime.time
-    if isinstance(hora, str):
-        hora = datetime.strptime(hora, '%H:%M').time()
-
-    dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
-    hoy = datetime.now()
-    dia_actual = hoy.weekday()
-    dias_hasta_alarma = dias.index(dia_semana) - dia_actual
-
-    # Si el día de la alarma es hoy y la hora ya pasó, programar para la próxima semana
-    if dias_hasta_alarma == 0 and hora <= hoy.time():
-        dias_hasta_alarma += 7
-    elif dias_hasta_alarma < 0:
-        # Si la alarma es para un día que ya pasó en la semana, mover a la próxima semana
-        dias_hasta_alarma += 7
-
-    proxima_fecha = hoy.date() + timedelta(days=dias_hasta_alarma)
-    return datetime.combine(proxima_fecha, hora)
-
-@app.route('/agregar_tarea', methods=['POST'])
-@login_required
-def agregar_tarea():
-    try:
-        if request.is_json:
-            data = request.get_json()
-        else:
-            data = request.form.to_dict()
-
-        session.commit()
-
-        contenido_tarea = data.get('contenido_tarea')
-        if contenido_tarea is None:
-            return jsonify({"error": "Introduce el contenido de la tarea por favor"}), 400
-
-        prioridad = data.get('prioridad')
-        dias_semana = data.get('dias_semana')
-        horario_inicio = data.get('horario_inicio')
-        if horario_inicio is None:
-            return jsonify({"error": "Introduce el horario por favor"}), 400
-
-        horario_inicio = datetime.strptime(horario_inicio, '%H:%M').time()
-
-        # Conversión de 'tiempo'
-        try:
-            tiempo = int(data.get('tiempo', 0))
-        except ValueError:
-            return jsonify({"error": "Tiempo no es un número válido"}), 400
-
-        switch_alarma = data.get('alarma')
-        switch_recordatorio = data.get('recordatorio')
-        tiempo_recordatorio = data.get('tiempo_recordatorio')
-        if tiempo_recordatorio is not None:
-            tiempo_recordatorio = int(tiempo_recordatorio)
-
-        estado = data.get('realizada_hoy') == True
-
-        nueva_tarea = None
-
-        id_tarea = data.get("index")
-        if id_tarea:
-            session.query(TareasSemana).filter_by(id_tarea=id_tarea, id_usuario=current_user.id_usuario).delete()
-            session.commit()
-
-        for dia in dias_semana:
-            nueva_tarea = TareasSemana(
-                contenido_tarea=contenido_tarea,
-                prioridad=prioridad,
-                dia_semana=dia,
-                horario_inicio=horario_inicio,
-                tiempo=tiempo,
-                switch_alarma=switch_alarma,
-                switch_recordatorio=switch_recordatorio,
-                tiempo_recordatorio=tiempo_recordatorio,
-                estado=estado,
-                id_usuario=current_user.id_usuario
-            )
-            session.add(nueva_tarea)
-            session.commit()
-
-            if switch_alarma:
-                programar_alarma(nueva_tarea)
-
-            if switch_recordatorio and tiempo_recordatorio:
-                programar_recordatorio(nueva_tarea)
-
-        proxima_alarma = calcular_proxima_alarma(dias_semana[0], horario_inicio)
-
-        if nueva_tarea and switch_recordatorio and tiempo_recordatorio:
-            programar_recordatorio(nueva_tarea)
-
-        flash('Tarea guardada con éxito', 'success')
-
-    except Exception as e:
-        session.rollback()
-        return jsonify({"error": "Error al agregar la tarea: " + str(e)}), 500
-
-    return jsonify({"success": True, "proxima_alarma": proxima_alarma.strftime('%Y-%m-%d %H:%M:%S')})
 
 @app.route('/configurar_horas', methods=['POST'])
 @login_required
@@ -511,92 +725,28 @@ def horas_disponibles():
     }
     return render_template('sitio/horas_disponibles.html', horas_disponibles=horas_disponibles_dias)
 
-@app.route('/posponer_alarma', methods=['POST'])
-@login_required
-def posponer_alarma():
-    try:
-        data = request.form
-        id_tarea = int(data.get('id_tarea'))
-        tiempo_posponer = int(data.get('tiempo_posponer', 0))  # El tiempo es en minutos
+def calcular_proxima_alarma(dia_semana, hora):
 
-        tarea = session.query(TareasSemana).filter_by(id_tarea=id_tarea, id_usuario=current_user.id_usuario).first()
+    # Aseguramos que la variable 'hora' es de tipo datetime.time
+    if isinstance(hora, str):
+        hora = datetime.strptime(hora, '%H:%M').time()
 
-        if not tarea:
-            flash('Tarea no encontrada.', 'error')
-            return jsonify({"error": "Tarea no encontrada"}), 404
+    dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+    hoy = datetime.now()
+    dia_actual = hoy.weekday()
+    dias_hasta_alarma = dias.index(dia_semana) - dia_actual
 
-        # Para posponer el horario de inicio de la tarea
-        nuevo_horario_inicio = (datetime.combine(datetime.today(), tarea.horario_inicio) + timedelta(minutes=tiempo_posponer)).time()
-        tarea.horario_inicio = nuevo_horario_inicio
+    # Si el día de la alarma es hoy y la hora ya pasó, programar para la próxima semana
+    if dias_hasta_alarma == 0 and hora <= hoy.time():
+        dias_hasta_alarma += 7
+    elif dias_hasta_alarma < 0:
+        # Si la alarma es para un día que ya pasó en la semana, mover a la próxima semana
+        dias_hasta_alarma += 7
 
-        session.commit()
+    proxima_fecha = hoy.date() + timedelta(days=dias_hasta_alarma)
+    return datetime.combine(proxima_fecha, hora)
 
-        # Recalculamos tiempos de todas las tareas
-        tareas = session.query(TareasSemana).filter_by(id_usuario=current_user.id_usuario).order_by(TareasSemana.horario_inicio).all()
-        tiempo_disponible = session.query(TiempoDisponible).filter_by(id_usuario=current_user.id_usuario).first().horas_totales_disponibles * 60  # Convertir a minutos
-        reestructurar_tareas(tareas, tiempo_disponible)
-
-        flash('Tarea pospuesta ' + str(tiempo_posponer) + ' minutos.', 'success')
-        return jsonify({"success": True}), 200
-    except Exception as e:
-        flash('Error al posponer la tarea: ' + str(e), 'error')
-        return jsonify({"error": "Error interno del servidor: " + str(e)}), 500
-
-@app.route('/configurar_alarma', methods=['POST'])
-@login_required
-def configurar_alarma():
-    index = int(request.form.get('index'))
-    tarea = session.query(TareasSemana).filter_by(id_tarea=index, id_usuario=current_user.id_usuario).first()
-
-    if not tarea:
-        flash('Tarea no encontrada', 'error')
-        return redirect(url_for('taskminder'))
-
-    hora_alarma = datetime.combine(datetime.today(), tarea.horario_inicio)
-    tiempo_recordatorio = tarea.tiempo_recordatorio
-
-    app.logger.info("Programando alarma para %s a las %s", tarea.contenido_tarea, hora_alarma)
-
-    job_alarma = scheduler.add_job(alarma, 'date', run_date=hora_alarma, args=[tarea])
-    app.logger.info("Alarma programada con ID: %s", job_alarma.id)
-
-    if tiempo_recordatorio:
-        hora_recordatorio = hora_alarma - timedelta(minutes=tiempo_recordatorio)
-        app.logger.info("Programando recordatorio para %s a las %s", tarea.contenido_tarea, hora_recordatorio)
-        job_recordatorio = scheduler.add_job(recordatorio, 'date', run_date=hora_recordatorio, args=[tarea])
-        app.logger.info("Recordatorio programado con ID: %s", job_recordatorio.id)
-
-    flash('Alarma configurada con éxito para la tarea.')
-    return redirect(url_for('taskminder'))
-
-def recordatorio(tarea):
-    print("Ejecutando recordatorio para la tarea: " + tarea.contenido_tarea)
-
-    # Verificamos si el archivo de sonido es accesible
-    sound_path = os.path.join(base_dir, 'static', 'recordatorio_taskminder.mp3')
-    if os.path.exists(sound_path):
-        try:
-            mixer.init()
-            mixer.music.load(sound_path)
-            mixer.music.set_volume(1.0)  # Asegurar que el volumen está al 100%
-            mixer.music.play()
-            print("Reproduciendo sonido de recordatorio...")
-        except Exception as e:
-            print("Error al reproducir el sonido: " + str(e))
-    else:
-        print("Archivo de sonido no encontrado en la ruta: " + sound_path)
-
-def programar_alarma(tarea):
-    hora_alarma = datetime.combine(datetime.now().date(), tarea.horario_inicio)
-    scheduler.add_job(alarma, 'date', run_date=hora_alarma, args=[tarea])
-
-def programar_recordatorio(tarea):
-    hora_recordatorio = datetime.combine(datetime.now().date(), tarea.horario_inicio) - timedelta(minutes=tarea.tiempo_recordatorio)
-    scheduler.add_job(recordatorio, 'date', run_date=hora_recordatorio, args=[tarea])
-
-    print("Programando recordatorio para la tarea " + tarea.contenido_tarea + " a las " + str(hora_recordatorio))
-    scheduler.add_job(recordatorio, 'date', run_date=hora_recordatorio, args=[tarea])
-
+# Alarmas y recordatorios
 @app.route('/alarma')
 def alarma(tarea):
     print("Alarma para la tarea: " + tarea.contenido_tarea)
@@ -614,161 +764,127 @@ def alarma(tarea):
 
     return redirect(url_for('taskminder'))
 
-@app.route('/borrar_tarea', methods=['POST'])
-@login_required
-def borrar_tarea():
-    if request.is_json:
-        data = request.get_json()
-    else:
-        data = request.form.to_dict()
+def recordatorio(tarea):
+    print("Ejecutando recordatorio para la tarea: " + tarea.contenido_tarea)
 
-    try:
-        tarea_id = int(data['id_tarea'])
-        tarea = session.query(TareasSemana).filter_by(id_tarea=tarea_id, id_usuario=current_user.id_usuario).first()
-
-        if tarea:
-            session.delete(tarea)
-            session.commit()
-            return jsonify({'success': True}), 200
-        else:
-            return jsonify({'error': 'Tarea no encontrada'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/modificar_tarea/<int:index>', methods=['GET', 'POST'])
-@login_required
-def modificar_tarea(index):
-    tarea = session.query(TareasSemana).filter_by(id_tarea=index, id_usuario=current_user.id_usuario).first()
-
-    # Verificamos que la tarea pertenece al usuario actual
-    if not tarea:
-        flash('Tarea no encontrada o no tienes permisos para modificarla.')
-        return redirect(url_for('taskminder'))
-
-    if request.method == 'POST':
-        tarea.contenido_tarea = request.form.get('contenido_tarea')
+    # Verificamos si el archivo de sonido es accesible
+    sound_path = os.path.join(base_dir, 'static', 'recordatorio_taskminder.mp3')
+    if os.path.exists(sound_path):
         try:
-            tarea.prioridad = int(request.form.get('prioridad'))
-            tarea.tiempo = int(request.form.get('tiempo'))
-        except ValueError:
-            flash('Por favor, introduce valores válidos para prioridad y tiempo.')
-            return redirect(url_for('taskminder', id_tarea=index))
-        session.commit()
-        flash('Tarea modificada con éxito')
-        return redirect(url_for('taskminder'))
-
-    return render_template('modificar_tarea.html', tarea=tarea, id_tarea=index)
-
-@app.route('/eliminar_tarea/<int:index>', methods=['POST'])
-@login_required
-def eliminar_tarea(index):
-    tarea = session.query(TareasSemana).filter_by(id_tarea=index, id_usuario=current_user.id_usuario).first()
-    if not tarea:
-        flash('Tarea no encontrada')
-        return redirect(url_for('taskminder'))
-
-    session.delete(tarea)
-    session.commit()
-    flash('Tarea eliminada con éxito.')
-    return redirect(url_for('taskminder'))
-
-@app.route('/actualizar_tarea', methods=['POST'])
-@login_required
-def actualizar_tarea():
-    data = request.json
-    id_tarea = data.get('id_tarea')
-    estado = data.get('estado')
-
-    app.logger.info(f"Actualizando tarea: id={id_tarea}, estado={estado}")
-
-    tarea = session.query(TareasSemana).filter_by(id_tarea=id_tarea, id_usuario=current_user.id_usuario).first()
-
-    if tarea:
-        tarea.estado = estado
-        try:
-            session.commit()
-            app.logger.info(f"Tarea actualizada correctamente: id={id_tarea}")
-            return jsonify({"success": True}), 200
+            mixer.init()
+            mixer.music.load(sound_path)
+            mixer.music.set_volume(1.0)  # Asegura que el volumen está al 100%
+            mixer.music.play()
+            print("Reproduciendo sonido de recordatorio...")
         except Exception as e:
-            session.rollback()
-            app.logger.error(f"Error al actualizar tarea: {str(e)}")
-            return jsonify({"error": "Error al actualizar la tarea en la base de datos"}), 500
+            print("Error al reproducir el sonido: " + str(e))
     else:
-        app.logger.error(f"Tarea no encontrada: id={id_tarea}")
-        return jsonify({"error": "Tarea no encontrada"}), 404
+        print("Archivo de sonido no encontrado en la ruta: " + sound_path)
 
-@app.route('/obtener_tareas')
-@login_required
-def obtener_tareas():
-    tareas = session.query(TareasSemana).filter_by(id_usuario=current_user.id_usuario).all()
-    tareas_dict = [{'id': tarea.id_tarea, 'contenido_tarea': tarea.contenido_tarea, 'prioridad': tarea.prioridad,
-                    'dia_semana': tarea.dia_semana, 'horario_inicio': tarea.horario_inicio,
-                    'tiempo': tarea.tiempo, 'realizada': tarea.estado} for tarea in tareas]
-    return jsonify({'tareas': tareas_dict})
+def programar_alarma(tarea, switch_alarma, switch_recordatorio):
+    hora_alarma = datetime.combine(datetime.now().date(), tarea.horario_inicio)
+    if switch_alarma == 1 and switch_recordatorio == 1:
+        scheduler.add_job(alarma, 'date', run_date=hora_alarma, args=[tarea])
+        scheduler.add_job(recordatorio, 'date', run_date=hora_alarma - timedelta(minutes=tarea.tiempo_recordatorio), args=[tarea])
+    elif switch_alarma == 1 and switch_recordatorio == 0:
+        scheduler.add_job(alarma, 'date', run_date=hora_alarma, args=[tarea])
+    elif switch_alarma == 0 and switch_recordatorio == 1:
+        scheduler.add_job(recordatorio, 'date', run_date=hora_alarma - timedelta(minutes=tarea.tiempo_recordatorio), args=[tarea])
 
-@app.route("/tareas_hoy")
-@login_required
-def tareas_hoy():
-    return render_template('sitio/tareas_hoy.html')
+def programar_recordatorio(tarea, switch_alarma, switch_recordatorio):
+    hora_recordatorio = datetime.combine(datetime.now().date(), tarea.horario_inicio) - timedelta(minutes=tarea.tiempo_recordatorio)
+    if switch_alarma == 1 and switch_recordatorio == 1:
+        scheduler.add_job(alarma, 'date', run_date=hora_recordatorio + timedelta(minutes=tarea.tiempo_recordatorio), args=[tarea])
+        scheduler.add_job(recordatorio, 'date', run_date=hora_recordatorio, args=[tarea])
+    elif switch_alarma == 1 and switch_recordatorio == 0:
+        scheduler.add_job(alarma, 'date', run_date=hora_recordatorio + timedelta(minutes=tarea.tiempo_recordatorio), args=[tarea])
+    elif switch_alarma == 0 and switch_recordatorio == 1:
+        scheduler.add_job(recordatorio, 'date', run_date=hora_recordatorio, args=[tarea])
 
-@app.route('/ver_horario')
-@login_required
-def ver_horario():
-    tareas = session.query(TareasSemana).filter_by(id_usuario=current_user.id_usuario).all()
-    tiempo_disponible_obj = session.query(TiempoDisponible).filter_by(id_usuario=current_user.id_usuario).first()
-    tiempo_disponible = tiempo_disponible_obj.horas_totales_disponibles if tiempo_disponible_obj else 0
-
-    recalcular_horas(tareas, tiempo_disponible)
-
-    return render_template('ver_horario.html', horas=tiempo_disponible, tareas=tareas)
+    print("Programando recordatorio para la tarea " + tarea.contenido_tarea + " a las " + str(hora_recordatorio))
+    scheduler.add_job(recordatorio, 'date', run_date=hora_recordatorio, args=[tarea])
 
 # Funciones auxiliares:
+def get_minutos_disponibles(dia):
+    tiempo_disponible = session.query(TiempoDisponible).filter_by(id_usuario=current_user.id_usuario).first()
+    if tiempo_disponible:
+        return getattr(tiempo_disponible, "minutos_disponibles_" + dia)
+    return 0
+
 #  Esta función recalcula los tiempos de las tareas teniendo en cuenta las prioridades y asegura que el tiempo total de las tareas no exceda el tiempo disponible.
 def ajustar_tiempos_tareas(dia, minutos_disponibles_dia):
-    tareas = session.query(TareasSemana).filter_by(dia_semana=dia, id_usuario=current_user.id_usuario).order_by(TareasSemana.prioridad.desc()).all()
-    tiempo_total = sum(tarea.tiempo for tarea in tareas)
+    logging.info(f"Iniciando ajuste de tiempos para el día {dia}. Minutos disponibles: {minutos_disponibles_dia}")
 
-    if tiempo_total <= minutos_disponibles_dia:
+    tareas = session.query(TareasSemana).filter_by(dia_semana=dia, id_usuario=current_user.id_usuario).order_by(TareasSemana.prioridad.desc()).all()
+    logging.info(f"Tareas encontradas: {len(tareas)}")
+
+    tiempo_total_original = sum(tarea.tiempo_original for tarea in tareas)
+    logging.info(f"Tiempo total original: {tiempo_total_original}")
+
+    if tiempo_total_original <= minutos_disponibles_dia:
+        logging.info("No se requiere ajuste, el tiempo total es menor o igual al disponible")
+        for tarea in tareas:
+            if tarea.tiempo != tarea.tiempo_original:
+                logging.info(f"Restaurando tiempo original para tarea {tarea.id_tarea}: {tarea.tiempo} -> {tarea.tiempo_original}")
+                tarea.tiempo = tarea.tiempo_original
+                if tarea.tiempo not in tarea.historial_tiempos:
+                    tarea.historial_tiempos.append(tarea.tiempo)
+                    logging.info(f"Actualizado historial_tiempos para tarea {tarea.id_tarea}: {tarea.historial_tiempos}")
+        session.commit()
+        logging.info("Cambios guardados en la base de datos")
         return True
 
-    tiempos_ajustados = []
-    reduccion_por_prioridad = {
-        3: 0.1,  # Máxima
-        2: 0.2,  # Importante
-        1: 0.3,  # Moderada
-        0: 0.4   # Menor
-    }
+    factor_ajuste = minutos_disponibles_dia / tiempo_total_original
+    logging.info(f"Factor de ajuste calculado: {factor_ajuste}")
+
+    tiempo_ajustado_total = 0
 
     for tarea in tareas:
-        prioridad = tarea.prioridad
-        tiempo_inicial = tarea.tiempo
-        porcentaje_reduccion = reduccion_por_prioridad.get(prioridad, 0.4)
-        tiempo_ajustado = tiempo_inicial * (1 - porcentaje_reduccion)
-        tiempo_ajustado = max(tiempo_ajustado, tiempo_inicial * 0.5)  # No reducimos ninguna tarea más del 50%
-        tiempos_ajustados.append(tiempo_ajustado)
+        tiempo_ajustado = round(tarea.tiempo_original * factor_ajuste)
+        tiempo_ajustado = max(tiempo_ajustado, round(tarea.tiempo_original * 0.5))  # No reducir más del 50% el tiempo de las tareas
+        logging.info(f"Ajustando tarea {tarea.id_tarea}: {tarea.tiempo} -> {tiempo_ajustado}")
 
-    tiempo_total_ajustado = sum(tiempos_ajustados)
-    diferencia_tiempo = minutos_disponibles_dia - tiempo_total_ajustado
-
-    if diferencia_tiempo > 0:
-        total_reduccion = sum(reduccion_por_prioridad.get(tarea.prioridad, 0.4) for tarea in tareas)
-        for tarea, tiempo_ajustado in zip(tareas, tiempos_ajustados):
-            proporcion_redistribucion = reduccion_por_prioridad.get(tarea.prioridad, 0.4) / total_reduccion
-            tiempo_final = tiempo_ajustado + (proporcion_redistribucion * diferencia_tiempo)
-            tarea.tiempo = tiempo_final
-    else:
-        for tarea, tiempo_ajustado in zip(tareas, tiempos_ajustados):
+        if tarea.tiempo != tiempo_ajustado:
             tarea.tiempo = tiempo_ajustado
+            if tiempo_ajustado not in tarea.historial_tiempos:
+                tarea.historial_tiempos.append(tiempo_ajustado)
+                logging.info(f"Actualizado historial_tiempos para tarea {tarea.id_tarea}: {tarea.historial_tiempos}")
+        tiempo_ajustado_total += tiempo_ajustado
 
-    session.commit()
+    # Distribuye el tiempo restante (si lo hay) a las tareas de mayor prioridad
+    tiempo_restante = minutos_disponibles_dia - tiempo_ajustado_total
+    logging.info(f"Tiempo restante después del ajuste inicial: {tiempo_restante}")
+
+    for tarea in tareas:
+        if tiempo_restante <= 0:
+            break
+        aumento = min(tiempo_restante, tarea.tiempo_original - tarea.tiempo)
+        if aumento > 0:
+            logging.info(f"Aumentando tiempo de tarea {tarea.id_tarea} en {aumento} minutos")
+            tarea.tiempo += aumento
+            if tarea.tiempo not in tarea.historial_tiempos:
+                tarea.historial_tiempos.append(tarea.tiempo)
+                logging.info(f"Actualizado historial_tiempos para tarea {tarea.id_tarea}: {tarea.historial_tiempos}")
+        tiempo_restante -= aumento
+
+    try:
+        session.commit()
+        logging.info("Cambios guardados en la base de datos")
+    except Exception as e:
+        logging.error(f"Error al guardar cambios en la base de datos: {str(e)}")
+        session.rollback()
+        raise
+
+    logging.info("Ajuste de tiempos completado")
+    return True
 
 # Esta función se encarga de ajustar los tiempos de las tareas siguientes y reducirlas proporcionalmente según su importancia
 def reestructurar_tareas(tareas, total_horas_disponibles):
     reduccion_por_prioridad = {
-        3: 0.1,  # Prioridad máxima
-        2: 0.2,  # Prioridad importante
-        1: 0.3,  # Prioridad moderada
-        0: 0.4   # Prioridad menor
+        3: 0.05, # Prioridad máxima
+        2: 0.1,  # Prioridad importante
+        1: 0.2,  # Prioridad moderada
+        0: 0.3   # Prioridad menor
     }
 
     tiempos_ajustados_iniciales = []
@@ -854,6 +970,18 @@ def verificar_cambio_actividad():
                 break
 
 scheduler.add_job(verificar_cambio_actividad, 'interval', minutes=1)
+
+
+@app.route('/ver_horario')
+@login_required
+def ver_horario():
+    tareas = session.query(TareasSemana).filter_by(id_usuario=current_user.id_usuario).all()
+    tiempo_disponible_obj = session.query(TiempoDisponible).filter_by(id_usuario=current_user.id_usuario).first()
+    tiempo_disponible = tiempo_disponible_obj.horas_totales_disponibles if tiempo_disponible_obj else 0
+
+    recalcular_horas(tareas, tiempo_disponible)
+
+    return render_template('ver_horario.html', horas=tiempo_disponible, tareas=tareas)
 
 
 # Para errores:
